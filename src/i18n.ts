@@ -1,0 +1,475 @@
+import i18n from "i18next";
+import { initReactI18next } from "react-i18next";
+import { translateText, getLanguageCode } from "./services/translationService";
+
+const resources = {
+  en: {
+    translation: {
+      "hero.title": "Empower Your Voice, Drive Change in Your Community",
+      "hero.description":
+        "Report corruption and issues requiring government intervention. Join thousands making Africa more transparent.",
+      "nav.features": "Features",
+      "nav.howItWorks": "How It Works",
+      "nav.impact": "Impact",
+      login: "Login",
+      getStarted: "Get Started",
+      trustedBy: "Trusted by 10,000+ Citizens",
+      secureAnonymous: "Secure & Anonymous",
+      realTimeTracking: "Real-time Tracking",
+      communityDriven: "Community Driven",
+      activeCitizens: "Active Citizens",
+      reportsSubmitted: "Reports Submitted",
+      issuesResolved: "Issues Resolved",
+      simpleProcess: "Simple, Transparent Process",
+      createAccount: "Create Account",
+      submitReport: "Submit Report",
+      trackProgress: "Track Progress",
+      seeChange: "See Change",
+      twoWays: "Two Ways to Make a Difference",
+      redFlagReports: "Red-Flag Reports",
+      interventionRequests: "Intervention Requests",
+      redFlagDesc:
+        "Report corruption, bribery, embezzlement, and misconduct by public officials.",
+      interventionDesc:
+        "Report broken roads, faulty streetlights, understocked hospitals.",
+      anonymousReporting: "Anonymous reporting option",
+      uploadEvidence: "Upload evidence (photos, videos)",
+      trackStatus: "Track investigation status",
+      preciseMapping: "Precise location mapping",
+      visualDoc: "Visual documentation",
+      resolutionUpdates: "Resolution updates",
+      "process.step1.desc": "Create an account securely",
+      "process.step2.desc": "Submit your report with evidence",
+      "process.step3.desc": "Track progress in real time",
+      "process.step4.desc": "Get notified when action is taken",
+      "hero.badge": "Trusted by 10,000+ Citizens",
+      "learnMore": "Learn More",
+      "stats.subtitle": "Together, we're building more transparent and accountable communities",
+      "process.subtitle": "From report to resolution in four easy steps",
+      "process.step1.detail": "Sign up with your email and create a secure account",
+      "process.step2.detail": "Describe the issue, add location, and upload evidence",
+      "process.step3.detail": "Monitor your report status from draft to resolution",
+      "process.step4.detail": "Get notified when authorities take action",
+      "reportTypes.subtitle": "Whether it's corruption or broken infrastructure, your voice matters",
+      "testimonials.title": "What Our Users Say",
+      "testimonials.subtitle": "Hear from citizens who have made a difference",
+      "testimonial1.quote": "iReporter helped me report corruption in my local government. The process was secure and anonymous, and I saw real change.",
+      "testimonial1.name": "Sarah Johnson",
+      "testimonial1.role": "Community Activist",
+      "testimonial2.quote": "Reporting infrastructure issues has never been easier. The app's location mapping and tracking features are fantastic.",
+      "testimonial2.name": "Michael Chen",
+      "testimonial2.role": "Local Resident",
+      "testimonial3.quote": "As a journalist, iReporter has been invaluable for gathering citizen reports and holding authorities accountable.",
+      "testimonial3.name": "Amina Okafor",
+      "testimonial3.role": "Investigative Journalist",
+      "recentSuccess": "Recent Success Stories",
+      "seeChangeCommunity": "See how your reports are making a difference in communities across Africa",
+      "resolved": "Resolved",
+      "redFlagReport": "Red-Flag Report",
+      "interventionRequest": "Intervention Request",
+      "healthcareIssue": "Healthcare Issue",
+      "story1.title": "Corruption in Local Government",
+      "story1.desc": "A citizen reported embezzlement of public funds by local officials. The report led to a full investigation, recovery of stolen funds, and prosecution of those involved.",
+      "fundsRecovered": "Funds Recovered",
+      "officialsCharged": "Officials Charged",
+      "daysToResolution": "Days to Resolution",
+      "story2.title": "Broken Street Lights Fixed",
+      "story2.desc": "Community members reported non-functional street lights affecting safety. Authorities responded within 48 hours, repairing 15 lights and improving neighborhood security.",
+      "lightsRepaired": "Lights Repaired",
+      "responseTime": "Response Time",
+      "citizensBenefited": "Citizens Benefited",
+      "story3.title": "Hospital Equipment Restored",
+      "story3.desc": "Reports of malfunctioning medical equipment in a public hospital led to immediate repairs and restocking of essential supplies, improving healthcare delivery.",
+      "equipmentFixed": "Equipment Fixed",
+      "patientsHelped": "Patients Helped",
+      "viewAllStories": "View All Success Stories",
+      "trustedPartners": "Trusted Partners",
+      "workingTogether": "Working together to build transparent communities",
+      "getApp": "Get the App",
+      "appDesc": "Download our mobile app for on-the-go reporting and tracking",
+      "downloadOnThe": "Download on the",
+      "appStore": "App Store",
+      "getItOn": "Get it on",
+      "googlePlay": "Google Play",
+      "readyToMakeDifference": "Ready to Make a Difference?",
+      "joinThousands": "Join thousands of citizens making Africa more transparent and accountable",
+      "createAccountBtn": "Create Account",
+      "loginBtn": "Login",
+      "partner1": "Transparency International",
+      "partner2": "Amnesty International",
+      "partner3": "United Nations",
+      "partner4": "African Union",
+      "partner5": "World Bank",
+      "partner6": "Local Governments",
+      "story1.location": "Lagos, Nigeria",
+      "story2.location": "Nairobi, Kenya",
+      "story3.location": "Accra, Ghana",
+      "support.title": "Support Center",
+      "support.subtitle": "Help & Support",
+      "support.faq.title": "Frequently Asked Questions",
+      "support.faq.q1": "What is iReporter?",
+      "support.faq.a1": "iReporter is a platform that allows citizens to report corruption and other issues affecting their communities. You can submit red flag reports for corruption cases or intervention reports for issues requiring government attention.",
+      "support.faq.q2": "How do I create a report?",
+      "support.faq.a2": "To create a report, log in to your account, click on 'Create Report' from the dashboard, fill in the required details including title, description, location, and evidence, then submit. You can choose between Red Flag (corruption) or Intervention (other issues) reports.",
+      "support.faq.q3": "What happens after I submit a report?",
+      "support.faq.a3": "After submission, your report enters a draft status. It will be reviewed by administrators and may be moved to 'Under Investigation', 'Resolved', or 'Rejected' based on the findings. You'll receive notifications about status updates.",
+      "support.faq.q4": "Can I edit my report after submission?",
+      "support.faq.a4": "Yes, you can edit draft reports. Once a report is under investigation, editing may be restricted. Contact support if you need to make changes to an active report.",
+      "support.faq.q5": "How do I know if my report is being investigated?",
+      "support.faq.a5": "You can check the status of your reports on your dashboard. Reports under investigation will show 'Under Investigation' status. You'll also receive email notifications about status changes.",
+      "support.faq.q6": "What types of evidence should I include?",
+      "support.faq.a6": "Include photos, videos, documents, or any other relevant evidence that supports your report. Make sure evidence is clear and directly related to the issue you're reporting.",
+      "support.faq.q7": "Is my information kept confidential?",
+      "support.faq.a7": "Yes, we take privacy seriously. Your personal information is protected, and you can choose to remain anonymous for certain types of reports. However, some contact information may be required for verification purposes.",
+      "support.faq.q8": "How long does it take to resolve a report?",
+      "support.faq.a8": "Resolution time varies depending on the complexity of the issue. Simple reports may be resolved within days, while complex corruption cases may take weeks or months to investigate thoroughly.",
+      "support.contact.title": "Contact Admin/Support",
+      "support.contact.getInTouch": "Get in Touch",
+      "support.contact.description": "Need help with your account, have questions about a report, or want to provide feedback? Our support team is here to assist you.",
+      "support.contact.adminEmail": "Admin Email",
+      "support.contact.contactForHelp": "Contact for Help",
+      "support.contact.responseTimes": "Response Times",
+      "support.contact.generalInquiries": "General inquiries",
+      "support.contact.urgentReports": "Urgent reports",
+      "support.contact.technicalIssues": "Technical issues",
+      "support.contact.emergency": "Emergency: For immediate threats to life or safety, please contact local authorities directly at emergency services.",
+      "support.tips.title": "Tips for Submitting Good Reports",
+      "support.tips.1.title": "Be Specific and Detailed",
+      "support.tips.1.description": "Provide clear, detailed descriptions of the incident. Include who, what, when, where, and how the issue occurred. Vague reports are harder to investigate.",
+      "support.tips.2.title": "Include Evidence",
+      "support.tips.2.description": "Attach photos, videos, documents, or any other supporting evidence. Visual evidence strengthens your report and helps investigators understand the situation better.",
+      "support.tips.3.title": "Use Clear Location Information",
+      "support.tips.3.description": "Provide accurate location details using the map picker or by entering specific addresses. This helps authorities respond to the right location.",
+      "support.tips.4.title": "Choose the Right Report Type",
+      "support.tips.4.description": "Select 'Red Flag' for corruption-related issues and 'Intervention' for other government or community problems. This ensures your report reaches the appropriate department.",
+      "support.tips.5.title": "Write a Clear Title",
+      "support.tips.5.description": "Use descriptive titles that summarize the main issue. Avoid generic titles like 'Corruption Report' - instead use something like 'Bribery in Government Contract Award Process'.",
+      "support.tips.6.title": "Stay Professional",
+      "support.tips.6.description": "Use professional language and avoid emotional outbursts. Stick to facts and let the evidence speak for itself.",
+      "support.tips.7.title": "Follow Up",
+      "support.tips.7.description": "Check your dashboard regularly for updates and respond promptly to any requests for additional information from investigators.",
+      "support.tips.8.title": "Report Timely",
+      "support.tips.8.description": "Submit reports as soon as possible after the incident occurs while details are still fresh and evidence is available.",
+      "support.quickActions.title": "Still need help?",
+      "support.quickActions.description": "Can't find what you're looking for? Our support team is ready to help you with any questions or issues you may have.",
+      "support.quickActions.contactSupport": "Contact Support",
+      "support.quickActions.browseFAQ": "Browse FAQ Again",
+      "dashboard.overview": "Overview",
+      "dashboard.myReports": "My Reports",
+      "dashboard.citizenReporter": "Citizen Reporter",
+      "dashboard.theme": "Theme",
+      "dashboard.editProfile": "Edit Profile",
+      "dashboard.profilePicture": "Profile Picture",
+      "dashboard.firstName": "First Name",
+      "dashboard.lastName": "Last Name",
+      "dashboard.email": "Email",
+      "dashboard.phone": "Phone",
+      "dashboard.saveChanges": "Save Changes",
+      "dashboard.cancel": "Cancel",
+      "dashboard.saving": "Saving...",
+      "dashboard.uploadPicture": "Upload Picture",
+      "dashboard.removePicture": "Remove Picture",
+      "dashboard.reportsOverview": "Reports Overview",
+      "dashboard.totalReports": "Total Reports",
+      "dashboard.redFlags": "Red Flags",
+      "dashboard.interventions": "Interventions",
+      "dashboard.logout": "Logout",
+      "dashboard.underInvestigation": "Under Investigation",
+      "dashboard.resolved": "Resolved",
+      "dashboard.rejected": "Rejected",
+      "dashboard.draft": "Draft",
+      "dashboard.recentReports": "Recent Reports",
+      "dashboard.viewAll": "View All →",
+      "dashboard.noRecentReports": "No recent reports found. Create your first report to see it here!",
+      "dashboard.reportsShownLastDays": "Reports shown are from the last 7 days",
+      "dashboard.analyticsOverview": "Analytics Overview",
+      "dashboard.refresh": "Refresh",
+      "dashboard.statusDistribution": "Status Distribution",
+      "dashboard.createIntervention": "Create Intervention",
+      "dashboard.requestGovernmentHelp": "Request government help",
+      "dashboard.viewReports": "View Reports",
+      "dashboard.viewNotifications": "View Notifications",
+      "dashboard.checkRecentUpdates": "Check recent updates",
+      "dashboard.getSupport": "Get Support",
+      "dashboard.helpAndResources": "Help and resources",
+      "dashboard.menu": "Menu",
+      "dashboard.close": "Close",
+      "dashboard.failedUpload": "Failed to upload profile picture",
+      "dashboard.failedUpdate": "Failed to update profile",
+      "dashboard.errorUpdate": "Error updating profile",
+      "auth.welcomeBack": "Welcome Back",
+      "auth.loginToAccount": "Login to your account",
+      "auth.email": "Email",
+      "auth.password": "Password",
+      "auth.login": "Login",
+      "auth.forgotPassword": "Forgot Password?",
+      "auth.dontHaveAccount": "Don't have an account?",
+      "auth.signUp": "Sign Up",
+      "auth.createAccount": "Create Account",
+      "auth.joinCommunity": "Join our community of citizen reporters",
+      "auth.firstName": "First Name",
+      "auth.lastName": "Last Name",
+      "auth.confirmPassword": "Confirm Password",
+      "auth.alreadyHaveAccount": "Already have an account?",
+      "auth.signIn": "Sign In",
+      "auth.signingUp": "Signing up...",
+      "auth.loggingIn": "Logging in...",
+      "redFlags.title": "Red Flags Report",
+      "redFlags.pageTitle": "iReporter - Red Flags Report",
+      "redFlags.header": "Red Flags",
+      "redFlags.management": "Red Flags Management",
+      "redFlags.myRedFlags": "My Red Flags",
+      "redFlags.resolved": "Resolved Red Flags",
+      "redFlags.unresolved": "Unresolved Red Flags",
+      "redFlags.rejected": "Rejected Red Flags",
+      "redFlags.noReports": "No red flags yet. Create your first report!",
+      "redFlags.errorLoading": "Failed to load red flags",
+      "redFlags.errorProcessing": "Failed to process red flags data",
+      "redFlags.errorInvalidResponse": "Invalid response from server",
+      "redFlags.createdDate": "Created Date",
+      "redFlags.created": "Created",
+      "redFlags.createRedFlag": "Create Red Flag",
+      "interventions.title": "Interventions Report",
+      "interventions.pageTitle": "iReporter - Interventions Report",
+      "interventions.header": "Interventions",
+      "interventions.management": "Interventions Management",
+      "interventions.myInterventions": "My Interventions",
+      "interventions.resolved": "Resolved Interventions",
+      "interventions.unresolved": "Unresolved Interventions",
+      "interventions.rejected": "Rejected Interventions",
+      "interventions.noReports": "No interventions yet. Create your first report!",
+      "interventions.loading": "Loading interventions...",
+      "interventions.errorLoading": "Failed to load interventions",
+      "interventions.errorProcessing": "Failed to process interventions data",
+      "interventions.errorInvalidResponse": "Invalid response from server",
+      "interventions.createdDate": "Created Date",
+      "interventions.created": "Created",
+      "interventions.createIntervention": "Create Intervention"
+    },
+  },
+
+  sw: {
+    translation: {
+      "hero.title": "Ipe Sauti Yako Nguvu, Endesha Mabadiliko Katika Jamii Yako",
+      "hero.description":
+        "Ripoti rushwa na masuala mengine yanayohitaji kuingilia kati kwa serikali moja kwa moja kwa mamlaka husika.",
+      login: "Ingia",
+      getStarted: "Anza",
+      "process.step1.desc": "Unda akaunti salama",
+      "process.step2.desc": "Wasilisha ripoti yako pamoja na ushahidi",
+      "process.step3.desc": "Fuatilia maendeleo kwa wakati halisi",
+      "process.step4.desc": "Pata taarifa hatua inapochukuliwa",
+    },
+  },
+
+  lg: {
+    translation: {
+      "hero.title": "Twala Eddoboozi Lyo, Leta Enkyukakyuka Mu Kitundu Kyo",
+      "hero.description":
+        "Langa obulyake n’ebizibu ebirala ebyetaaga okuddukanyizibwa gavumenti.",
+      login: "Yingira",
+      getStarted: "Tandika",
+    },
+  },
+
+  rn: {
+    translation: {
+      "hero.title":
+        "Ha Amajwi Yawe Amandla, Hindura Umuryango Wawe",
+      "hero.description":
+        "Menyesha ruswa n'ibindi bibazo bisaba kwitabwaho na leta.",
+      login: "Injira",
+      getStarted: "Tangira",
+    },
+  },
+
+  xog: {
+    translation: {
+      "hero.title": "Wa Eddoboozi Lyo Amaanyi, Leta Enkyukakyuka",
+      "hero.description":
+        "Langa obubbi n’ebizibu ebirala ebyetaaga obuyambi bwa gavumenti.",
+      login: "Yingira",
+      getStarted: "Tandika",
+    },
+  },
+
+  ar: {
+    translation: {
+      "hero.title": "امنح صوتك القوة واصنع التغيير في مجتمعك",
+      "hero.description":
+        "أبلغ عن الفساد وأي قضايا أخرى تتطلب تدخل الحكومة مباشرة.",
+      login: "تسجيل الدخول",
+      getStarted: "ابدأ الآن",
+    },
+  },
+
+  pt: {
+    translation: {
+      "hero.title":
+        "Dê Poder à Sua Voz e Promova Mudanças na Sua Comunidade",
+      "hero.description":
+        "Reporte corrupção e outros problemas que exigem intervenção governamental.",
+      login: "Entrar",
+      getStarted: "Começar",
+    },
+  },
+
+  zu: {
+    translation: {
+      "hero.title":
+        "Nikeza Amandla Izwi Lakho, Yenza Ushintsho Emphakathini Wakho",
+      "hero.description":
+        "Bika inkohlakalo nanoma yiziphi ezinye izinkinga ezidinga ukungenelela kukahulumeni ngqo kuziphathimandla.",
+      "nav.features": "Izici",
+      "nav.howItWorks": "Kusebenza Kanjani",
+      "nav.impact": "Umthelela",
+      login: "Ngena",
+      getStarted: "Qala",
+      trustedBy: "Kuthembekile ngabantu abangaphezu kuka-10,000",
+      secureAnonymous: "Kuphephile Futhi Akubonakali",
+      realTimeTracking: "Ukuthungatha Ngesikhathi Sangempela",
+      communityDriven: "Iqhutshwa Umphakathi",
+      activeCitizens: "Izakhamizi Ezisebenzayo",
+      reportsSubmitted: "Imibiko Ethunyelwe",
+      issuesResolved: "Izinkinga Ezixazululiwe",
+      simpleProcess: "Inqubo Elula Futhi Esobala",
+      createAccount: "Dala I-Akhawunti",
+      submitReport: "Thumela Umbiko",
+      trackProgress: "Landela Inqubekela Phambili",
+      seeChange: "Bona Ushintsho",
+      twoWays: "Izindlela Ezimbili Zokwenza Umehluko",
+      redFlagReports: "Imibiko Yefulegi Elibomvu",
+      interventionRequests: "Izicelo Zokungenelela",
+      redFlagDesc:
+        "Bika izehlakalo zenkohlakalo, ukufumbathisa, ukweba imali, nezinye izindlela zokungaziphathi kahle.",
+      interventionDesc:
+        "Bika izinkinga zengqalasizinda njengemigwaqo ephukile noma izakhiwo zomphakathi ezilimele.",
+      anonymousReporting: "Inketho yokubika ngokungaziwa",
+      uploadEvidence: "Layisha ubufakazi",
+      trackStatus: "Landela isimo sophenyo",
+      preciseMapping: "Ukudweba imephu ngokunembile",
+      visualDoc: "Imibhalo ebonakalayo",
+      resolutionUpdates: "Izibuyekezo zokuxazulula",
+      "process.step1.desc":
+        "Bhalisa nge-imeyili yakho futhi udale i-akhawunti ephephile",
+      "process.step2.desc":
+        "Chaza inkinga bese ulayisha ubufakazi",
+      "process.step3.desc":
+        "Qapha isimo sombiko wakho kusukela ekuqaleni kuya ekuxazululweni",
+      "process.step4.desc":
+        "Thola isaziso lapho iziphathimandla zithatha isinyathelo",
+    },
+  },
+
+  fr: {
+    translation: {
+      "hero.title": "Donnez du Pouvoir à Votre Voix, Créez le Changement dans Votre Communauté",
+      "hero.description":
+        "Signalez la corruption et d'autres problèmes nécessitant une intervention gouvernementale directement aux autorités.",
+      login: "Se connecter",
+      getStarted: "Commencer",
+      "partner1": "Transparency International",
+      "partner2": "Amnesty International",
+      "partner3": "Nations Unies",
+      "partner4": "Union Africaine",
+      "partner5": "Banque Mondiale",
+      "partner6": "Gouvernements Locaux",
+      "story1.location": "Lagos, Nigéria",
+      "story2.location": "Nairobi, Kenya",
+      "story3.location": "Accra, Ghana",
+    },
+  },
+
+  yo: {
+    translation: {
+      "hero.title": "Fun Agbara si Ohùn Rẹ, Ṣe Iyipada ni Agbegbe Rẹ",
+      "hero.description":
+        "Ròyìn ìwà ìbàjẹ́ àti àwọn ìṣòro mìíràn tí ó nílò ìdásìlẹ̀ ìjọba tààràtàà sí àwọn aláṣẹ.",
+      login: "Wọlé",
+      getStarted: "Bẹ̀rẹ̀",
+      "partner1": "Transparency International",
+      "partner2": "Amnesty International",
+      "partner3": "United Nations",
+      "partner4": "African Union",
+      "partner5": "World Bank",
+      "partner6": "Local Governments",
+      "story1.location": "Lagos, Nigeria",
+      "story2.location": "Nairobi, Kenya",
+      "story3.location": "Accra, Ghana",
+    },
+  },
+
+  am: {
+    translation: {
+      "hero.title": "ቃል አስተሳሪ ለመስጠት እና በማህበረሰብ አለም ለመለወጥ",
+      "hero.description":
+        "ምክክር እና ሌሎች ችግሮች የሚያስፈልጉ በቀጥታ ለሥልጣናት ሪፖርት ያድርጉ።",
+      login: "ግባ",
+      getStarted: "ጀምር",
+      "partner1": "Transparency International",
+      "partner2": "Amnesty International",
+      "partner3": "United Nations",
+      "partner4": "African Union",
+      "partner5": "World Bank",
+      "partner6": "Local Governments",
+      "story1.location": "ላጎስ፣ ናይጀሪያ",
+      "story2.location": "ናይሮቢ፣ ኬንያ",
+      "story3.location": "አክራ፣ ጋና",
+    },
+  },
+
+  ha: {
+    translation: {
+      "hero.title": "Ba da Murya ga Muryar ku, Ka canza Yanayin Ku",
+      "hero.description":
+        "Kai rahoton cin hanci da sauran batutuwa da ke bukatar sa baki daga gwamnati kai tsaye ga hukuma.",
+      login: "Shiga",
+      getStarted: "Fara",
+      "partner1": "Transparency International",
+      "partner2": "Amnesty International",
+      "partner3": "Majalisar Dinkin Duniya",
+      "partner4": "Tarayyar Afirka",
+      "partner5": "Bankin Duniya",
+      "partner6": "Gwamnatocin Gida",
+      "story1.location": "Lagos, Nigeria",
+      "story2.location": "Nairobi, Kenya",
+      "story3.location": "Accra, Ghana",
+    },
+  },
+};
+
+i18n
+  .use(initReactI18next)
+  .init({
+    resources,
+    lng: "en",
+    fallbackLng: "en",
+    debug: false,
+    interpolation: {
+      escapeValue: false,
+    },
+    missingKeyHandler: async (lngs, ns, key, fallbackValue) => {
+      // Try to translate missing keys using the API
+      const targetLang = lngs[0];
+      if (targetLang !== 'en') {
+        try {
+          const translated = await translateText(fallbackValue, getLanguageCode(targetLang));
+          // Add the translated key to resources for future use
+          if (!resources[targetLang]) {
+            resources[targetLang] = { translation: {} };
+          }
+          if (!resources[targetLang].translation) {
+            resources[targetLang].translation = {};
+          }
+          resources[targetLang].translation[key] = translated;
+          return translated;
+        } catch (error) {
+          console.error('Translation failed:', error);
+          return fallbackValue;
+        }
+      }
+      return fallbackValue;
+    },
+  });
+
+export default i18n;
