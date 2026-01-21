@@ -11,7 +11,7 @@ import {
   fetchPutFormData,
 } from "./apiHelpers";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+const API_URL = import.meta.env.VITE_API_URL || "https://i-reporter-backend123-mfln.vercel.app/api";
 
 interface ApiResponse<T> {
   status: number;
