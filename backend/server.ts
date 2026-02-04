@@ -32,11 +32,6 @@ app.get("/health", (req: Request, res: Response) => {
   });
 });
 
-// Catch all handler: send back React's index.html file for any non-API routes
-app.get("*", (req: Request, res: Response) => {
-  res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
-});
-
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   console.error(err.stack);
   res.status(500).json({
