@@ -80,6 +80,12 @@ CREATE TABLE IF NOT EXISTS notifications (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Insert default admin user (Mugisha Joshua)
+-- Password: "password" (hashed with bcrypt, salt rounds: 10)
+INSERT INTO users (first_name, last_name, email, password, is_admin)
+VALUES ('Mugisha', 'Joshua', 'Mollyadmin@ireporter.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', true)
+ON CONFLICT (email) DO NOTHING;
+
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_red_flags_user_id ON red_flags(user_id);
 CREATE INDEX IF NOT EXISTS idx_red_flags_status ON red_flags(status);

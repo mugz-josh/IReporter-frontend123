@@ -9,6 +9,8 @@ import {
   InterventionWithUser,
 } from "../types";
 import EmailService from "../services/emailService";
+import SMSService from "../services/smsService";
+import GovernmentAPIService from "../services/governmentAPIService";
 import {
   sendError,
   sendSuccess,
@@ -96,10 +98,7 @@ export const interventionsController = {
         videos: intervention?.videos ? JSON.parse(intervention?.videos) : [],
       };
 
-      res.status(200).json({
-        status: 200,
-        data: [interventionWithParsedMedia],
-      });
+      sendSuccess(res, 200, interventionWithParsedMedia);
     } catch (err) {
       console.error("Database error:", err);
       res.status(500).json({
@@ -262,14 +261,9 @@ export const interventionsController = {
         id,
       ]);
 
-      res.status(200).json({
-        status: 200,
-        data: [
-          {
-            id: parseInt(id),
-            message: `Added ${newImages.length} images and ${newVideos.length} videos to intervention record`,
-          },
-        ],
+      sendSuccess(res, 200, {
+        id: parseInt(id),
+        message: `Added ${newImages.length} images and ${newVideos.length} videos to intervention record`,
       });
     } catch (error) {
       console.error("Error adding media:", error);
@@ -331,14 +325,9 @@ export const interventionsController = {
         "UPDATE interventions SET latitude = $1, longitude = $2 WHERE id = $3";
       await pool.query(updateQuery, [latitude, longitude, id]);
 
-      res.status(200).json({
-        status: 200,
-        data: [
-          {
-            id: parseInt(id),
-            message: "Updated intervention record's location",
-          },
-        ],
+      sendSuccess(res, 200, {
+        id: parseInt(id),
+        message: "Updated intervention record's location",
       });
     } catch (error) {
       console.error("Error updating location:", error);
@@ -473,14 +462,9 @@ export const interventionsController = {
       const deleteQuery = "DELETE FROM interventions WHERE id = $1";
       await pool.query(deleteQuery, [id]);
 
-      res.status(200).json({
-        status: 200,
-        data: [
-          {
-            id: parseInt(id),
-            message: "Intervention record has been deleted",
-          },
-        ],
+      sendSuccess(res, 200, {
+        id: parseInt(id),
+        message: "Intervention record has been deleted",
       });
     } catch (error) {
       console.error("Error deleting intervention:", error);
@@ -572,14 +556,9 @@ export const interventionsController = {
 
       }
 
-      res.status(200).json({
-        status: 200,
-        data: [
-          {
-            id: parseInt(id),
-            message: "Updated intervention record status",
-          },
-        ],
+      sendSuccess(res, 200, {
+        id: parseInt(id),
+        message: "Updated intervention record status",
       });
     } catch (error) {
       console.error("Error updating status:", error);
@@ -697,14 +676,9 @@ export const interventionsController = {
       console.log(`✅ Database update took ${Date.now() - dbStart}ms`);
 
       console.log(`🎉 Total update time: ${Date.now() - startTime}ms`);
-      res.status(200).json({
-        status: 200,
-        data: [
-          {
-            id: parseInt(id),
-            message: "Updated intervention record",
-          },
-        ],
+      sendSuccess(res, 200, {
+        id: parseInt(id),
+        message: "Updated intervention record",
       });
     } catch (error) {
       console.error("Error updating intervention:", error);

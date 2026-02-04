@@ -1,4 +1,5 @@
 
+
 import { Response } from "express";
 import pool from "../config/database";
 import {
@@ -11,6 +12,8 @@ import {
 } from "../types";
 
 import EmailService from "../services/emailService";
+import SMSService from "../services/smsService";
+import GovernmentAPIService from "../services/governmentAPIService";
 import {
   sendError,
   sendSuccess,
@@ -92,10 +95,7 @@ export const redFlagsController = {
         videos: redFlag?.videos ? JSON.parse(redFlag.videos) : [],
       };
 
-      res.status(200).json({
-        status: 200,
-        data: [redFlagWithParsedMedia],
-      });
+      sendSuccess(res, 200, redFlagWithParsedMedia);
     } catch (err) {
       console.error("Database error:", err);
       res.status(500).json({
@@ -249,14 +249,9 @@ export const redFlagsController = {
         id,
       ]);
 
-      res.status(200).json({
-        status: 200,
-        data: [
-          {
-            id: parseInt(id),
-            message: `Added ${newImages.length} images and ${newVideos.length} videos to red-flag record`,
-          },
-        ],
+      sendSuccess(res, 200, {
+        id: parseInt(id),
+        message: `Added ${newImages.length} images and ${newVideos.length} videos to red-flag record`,
       });
     } catch (error) {
       console.error("Error adding media:", error);
@@ -382,14 +377,9 @@ export const redFlagsController = {
       const updateQuery = "UPDATE red_flags SET description = $1 WHERE id = $2";
       await pool.query(updateQuery, [description, id]);
 
-      res.status(200).json({
-        status: 200,
-        data: [
-          {
-            id: parseInt(id),
-            message: "Updated red-flag record's comment",
-          },
-        ],
+      sendSuccess(res, 200, {
+        id: parseInt(id),
+        message: "Updated red-flag record's comment",
       });
     } catch (error) {
       console.error("Error updating comment:", error);
@@ -447,14 +437,9 @@ export const redFlagsController = {
       const deleteQuery = "DELETE FROM red_flags WHERE id = $1";
       await pool.query(deleteQuery, [id]);
 
-      res.status(200).json({
-        status: 200,
-        data: [
-          {
-            id: parseInt(id),
-            message: "Red-flag record has been deleted",
-          },
-        ],
+      sendSuccess(res, 200, {
+        id: parseInt(id),
+        message: "Red-flag record has been deleted",
       });
     } catch (error) {
       console.error("Error deleting red flag:", error);
@@ -543,14 +528,60 @@ export const redFlagsController = {
       } catch (emailError) {
         console.error("Failed to send email notification:", emailError);
       }
-      res.status(200).json({
-        status: 200,
-        data: [
-          {
+
+      try {
+        await SMSService.sendStatusUpdateSMS(
+          "0754316375", // Admin phone number
+          "red-flag",
+          report.title,
+          status
+        );
+      } catch (smsError) {
+        console.error("Failed to send SMS notification:", smsError);
+      }
+
+      // Forward to government API if status is under-investigation
+      if (status === "under-investigation") {
+        try {
+          // Get full report data for government API
+          const fullReportQuery = `
+            SELECT rf.*, u.email
+            FROM red_flags rf
+            JOIN users u ON rf.user_id = u.id
+            WHERE rf.id = $1
+          `;
+          const fullReportResult = await pool.query(fullReportQuery, [id]);
+          const fullReport = fullReportResult.rows[0];
+
+          const governmentReportData = {
             id: parseInt(id),
-            message: "Updated red-flag record status",
-          },
-        ],
+            title: fullReport.title,
+            description: fullReport.description || '',
+            latitude: fullReport.latitude,
+            longitude: fullReport.longitude,
+            status: status,
+            images: fullReport.images ? JSON.parse(fullReport.images) : [],
+            videos: fullReport.videos ? JSON.parse(fullReport.videos) : [],
+            user_email: fullReport.email,
+            created_at: fullReport.created_at.toISOString(),
+            report_type: 'red_flag' as const,
+          };
+
+          const forwarded = await GovernmentAPIService.forwardReportToGovernment(governmentReportData);
+          if (forwarded) {
+            console.log(`Red flag report ${id} forwarded to government API`);
+          } else {
+            console.warn(`Failed to forward red flag report ${id} to government API`);
+          }
+        } catch (govError) {
+          console.error("Error forwarding report to government API:", govError);
+          // Don't fail the entire request if government API fails
+        }
+      }
+
+      sendSuccess(res, 200, {
+        id: parseInt(id),
+        message: "Updated red-flag record status",
       });
     } catch (error) {
       console.error("Error updating status:", error);
@@ -659,14 +690,9 @@ export const redFlagsController = {
       console.log(`✅ Database update took ${Date.now() - dbStart}ms`);
 
       console.log(`🎉 Total update time: ${Date.now() - startTime}ms`);
-      res.status(200).json({
-        status: 200,
-        data: [
-          {
-            id: parseInt(id),
-            message: "Updated red-flag record",
-          },
-        ],
+      sendSuccess(res, 200, {
+        id: parseInt(id),
+        message: "Updated red-flag record",
       });
     } catch (error) {
       console.error("Error updating red flag:", error);
