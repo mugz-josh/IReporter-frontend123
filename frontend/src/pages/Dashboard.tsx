@@ -48,6 +48,9 @@ export default function Dashboard() {
     theme: 'light',
     language: 'en'
   });
+  const [allUsers, setAllUsers] = useState<any[]>([]);
+  const [showUsersModal, setShowUsersModal] = useState(false);
+  const [loadingUsers, setLoadingUsers] = useState(false);
 
   useEffect(() => {
     if (!currentUser) {
@@ -57,6 +60,29 @@ export default function Dashboard() {
 
     loadStats();
   }, []);
+
+  const loadUsers = async () => {
+    if (!currentUser?.is_admin) {
+      alert("You don't have admin privileges to view users.");
+      return;
+    }
+
+    try {
+      setLoadingUsers(true);
+      const usersRes = await api.getUsers();
+      if (usersRes.status === 200 && usersRes.data) {
+        setAllUsers(usersRes.data);
+        setShowUsersModal(true);
+      } else {
+        alert("Failed to load users. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error loading users:", error);
+      alert("Error loading users. Please check your connection.");
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
 
   const loadStats = async () => {
     try {
@@ -861,6 +887,27 @@ export default function Dashboard() {
               >
                 🔄 Refresh
               </button>
+              {currentUser?.is_admin && (
+                <button
+                  onClick={loadUsers}
+                  disabled={loadingUsers}
+                  style={{
+                    padding: "0.5rem 1rem",
+                    background: "hsl(var(--destructive))",
+                    color: "hsl(var(--destructive-foreground))",
+                    border: "none",
+                    borderRadius: "0.375rem",
+                    cursor: loadingUsers ? "not-allowed" : "pointer",
+                    fontSize: "0.875rem",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.25rem",
+                    opacity: loadingUsers ? 0.6 : 1
+                  }}
+                >
+                  👥 {loadingUsers ? "Loading..." : "Load Users"}
+                </button>
+              )}
             </div>
           </div>
 
@@ -1097,6 +1144,8 @@ export default function Dashboard() {
                     fill="hsl(var(--destructive))"
                     name="Red Flags"
                     radius={[4, 4, 0, 0]}
+                
+                
                     animationBegin={400}
                     animationDuration={1200}
                   />
@@ -1118,6 +1167,7 @@ export default function Dashboard() {
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
               <h3 style={{ fontSize: "1.25rem", fontWeight: "600", color: "hsl(var(--foreground))" }}>
                 Report History
+                
               </h3>
               <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
                 <input
@@ -1140,7 +1190,7 @@ export default function Dashboard() {
                   onChange={(e) => setStatusFilter(e.target.value)}
                   style={{
                     padding: "0.5rem 1rem",
-                    border: "1px solid hsl(var(--border))",
+                    border: "1px soli for real and for sure pleaser(--border))",
                     borderRadius: "0.375rem",
                     background: "hsl(var(--background))",
                     color: "hsl(var(--foreground))",

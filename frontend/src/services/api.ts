@@ -50,7 +50,7 @@ export const api = {
     return response.json();
   },
 
-  getUsers: async (): Promise<ApiResponse<User>> => {
+  getUsers: async (): Promise<ApiResponse<User[]>> => {
     return fetchGet("/v1/auth/users");
   },
 
