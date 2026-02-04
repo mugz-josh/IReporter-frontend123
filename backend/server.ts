@@ -23,9 +23,6 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// Serve static files from the React app build directory
-app.use(express.static(path.join(__dirname, "../frontend/dist")));
-
 app.use("/api/v1", routes);
 
 app.get("/health", (req: Request, res: Response) => {
