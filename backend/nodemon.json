@@ -1,0 +1,9 @@
+{
+  "watch": ["Controllers", "routes", "services", "middleware", "server.ts"],
+  "ext": "ts",
+  "exec": "npx ts-node-dev --transpile-only server.ts",
+  "restartable": "rs",
+  "env": {
+    "NODE_ENV": "development"
+  }
+}

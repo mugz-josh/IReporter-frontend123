@@ -5,12 +5,12 @@
   "main": "dist/server.js",
   "scripts": {
     "start": "node dist/server.js",
-    "dev": "npx kill-port 3000 2>nul || true && ts-node-dev --respawn --transpile-only server.ts",
-    "dev:kill": "npx kill-port 3000 && npm run dev",
-    "dev:force": "npx kill-port 3000 2>nul || true && npm run dev",
+    "dev": "npx ts-node-dev --respawn --transpile-only ./server.ts",
+    "dev:kill": "npx kill-port 3001 && npm run dev",
+    "dev:force": "npx kill-port 3001 2>nul || true && npm run dev",
     "build": "tsc",
     "test": "jest",
-    "clean": "npx kill-port 3000 3001 5432 2>nul || true"
+    "clean": "npx kill-port 3001 5432 2>nul || true"
   },
   "dependencies": {
     "axios": "^1.6.7",
@@ -33,7 +33,9 @@
     "@types/node": "^20.8.0",
     "@types/nodemailer": "^6.4.14",
     "@types/pg": "^8.16.0",
+    "forever": "^4.0.3",
     "kill-port": "^2.0.1",
+    "ts-node": "^10.9.1",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.2.2"
   }
