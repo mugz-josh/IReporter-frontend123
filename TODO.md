@@ -1,17 +1,9 @@
-# Remove Audio Feature Tasks
+# TODO: Convert All Database Code to PostgreSQL
 
-## Frontend Changes
-- [ ] Remove audio field from Report interface (frontend/types/report.ts)
-- [ ] Delete AudioPlayer component (frontend/components/AudioPlayer.tsx)
-- [ ] Remove audio recording UI from CreateReport.tsx
-- [ ] Remove audio display sections from RedFlags.tsx and Interventions.tsx
-
-## Backend Changes
-- [ ] Remove audio handling from redFlagsController.ts
-- [ ] Remove audio handling from interventionsController.ts
-- [ ] Remove audio from processMediaFiles and parseMedia in controllerHelpers.ts
-- [ ] Update multer config to disallow audio uploads
-
-## Database and Migration
-- [ ] Delete audio migration files (migration_add_audio.sql, run_audio_migration.js)
-- [ ] Update TODO.md to remove audio-related tasks
+## Tasks
+- [x] Update backend/middleware/auth.ts: Replace pool.execute with pool.query, change ? to $1, adjust result handling
+- [x] Update backend/Controllers/commentsController.ts: Replace pool.execute with pool.query, change ? to $1, adjust result handling
+- [x] Update backend/test-passwords.js: Replace pool.execute with pool.query, change ? to $1, adjust result handling
+- [x] Run TypeScript compilation to verify errors are resolved
+- [x] Convert backend/setupTables.js from MySQL to PostgreSQL
+- [x] Convert backend/run_audio_migration.js from MySQL to PostgreSQL

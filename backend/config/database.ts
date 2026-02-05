@@ -9,7 +9,9 @@ const pool = new Pool({
   password: process.env.DB_PASSWORD || 'password',
   database: process.env.DB_NAME || 'ireporter',
   port: parseInt(process.env.DB_PORT || '5432'),
-  ssl: false, // Disable SSL for local development
+  ssl: {
+    rejectUnauthorized: false, // Enable SSL for Render Postgres
+  },
   max: 10, // Maximum number of clients in the pool
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 10000,
