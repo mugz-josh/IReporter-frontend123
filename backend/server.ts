@@ -2,7 +2,7 @@ import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import path from "path";
-import pool from "./config/database";
+import { getDatabase } from "./config/database.local";
 
 import routes from "./routes/routes";
 // import notificationController from "./Controllers/notificationController";
@@ -15,7 +15,11 @@ dotenv.config();
 
 console.log("✅ Environment variables loaded");
 console.log("🌐 PORT:", process.env.PORT || 3001);
-console.log("🗄️  Database Host:", process.env.DB_HOST ? "Set" : "Not set");
+console.log("🗄️  Using SQLite database for local development");
+
+// Initialize SQLite database
+const db = getDatabase();
+console.log("✅ Connected to SQLite database");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -24,7 +28,7 @@ console.log("🔧 Setting up middleware...");
 
 app.use(
   cors({
-    origin: ["http://localhost:3000", "http://localhost:3001", "http://localhost:3002", "http://localhost:3003", "http://localhost:5173", "https://josh-ireporter.vercel.app", "https://ireporter-frontend123.onrender.com"],
+    origin: ["http://localhost:3000", "http://localhost:3001", "http://localhost:3002", "http://localhost:3003", "http://localhost:3004", "http://localhost:5173", "https://josh-ireporter.vercel.app", "https://ireporter-frontend123.onrender.com"],
     credentials: true,
   })
 );
@@ -39,10 +43,10 @@ console.log("🛣️  Setting up basic routes...");
 // Basic test route without loading complex routes
 app.get("/health", async (req: Request, res: Response) => {
   try {
-    // Test database connection
-    const client = await pool.connect();
-    const dbStatus = "Connected to PostgreSQL database";
-    client.release();
+    // Test SQLite database connection
+    const db = getDatabase();
+    const result = db.prepare("SELECT 1 as test").get();
+    const dbStatus = "Connected to SQLite database";
 
     res.status(200).json({
       status: 200,

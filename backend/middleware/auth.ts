@@ -1,6 +1,6 @@
 import { Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import pool from "../config/database";
+import { getDatabase } from "../config/database.local";
 import { AuthRequest, ApiResponse } from "../types";
 
 export const auth = {
@@ -15,7 +15,7 @@ export const auth = {
       return;
     }
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as any;
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || "my-secret-key") as any;
       req.user = decoded;
       next();
     } catch (err) {
@@ -38,9 +38,10 @@ export const auth = {
         res.status(401).json(response);
         return;
       }
-      const query = "SELECT is_admin FROM users WHERE id = $1";
-      const result = await pool.query(query, [userId]);
-      if (result.rows.length === 0 || !result.rows[0].is_admin) {
+      const db = getDatabase();
+      const query = "SELECT is_admin FROM users WHERE id = ?";
+      const result = db.prepare(query).get(userId) as any;
+      if (!result || !result.is_admin) {
         const response: ApiResponse = {
           status: 403,
           error: "Access denied. Admin privileges required.",
@@ -71,9 +72,10 @@ export const auth = {
           res.status(401).json(response);
           return;
         }
-        const query = `SELECT user_id FROM ${table} WHERE id = $1`;
-        const result = await pool.query(query, [recordId]);
-        if (result.rows.length === 0) {
+        const db = getDatabase();
+        const query = `SELECT user_id FROM ${table} WHERE id = ?`;
+        const result = db.prepare(query).get(recordId) as any;
+        if (!result) {
           const response: ApiResponse = {
             status: 404,
             error: "Record not found",
@@ -81,7 +83,7 @@ export const auth = {
           res.status(404).json(response);
           return;
         }
-        if (result.rows[0].user_id !== userId && !req.user?.isAdmin) {
+        if (result.user_id !== userId && !req.user?.isAdmin) {
           const response: ApiResponse = {
             status: 403,
             error: "Access denied. You can only modify your own records.",

@@ -1,5 +1,5 @@
 import { Response } from "express";
-import pool from "../config/database";
+import { getDatabase } from "../config/database.local";
 import {
   AuthRequest,
   CreateRecordData,
@@ -28,10 +28,11 @@ export const interventionsController = {
     res: Response
   ): Promise<void> => {
     try {
+      const db = getDatabase();
       const userId = req.user?.id;
       const isAdmin = req.user?.isAdmin;
 
-    
+
       const query = isAdmin
         ? `
           SELECT i.*, u.first_name, u.last_name, u.email
@@ -43,16 +44,13 @@ export const interventionsController = {
           SELECT i.*, u.first_name, u.last_name, u.email
           FROM interventions i
           JOIN users u ON i.user_id = u.id
-          WHERE i.user_id = $1
+          WHERE i.user_id = ?
           ORDER BY i.created_at DESC
         `;
 
-      const result = await pool.query(
-        query,
-        isAdmin ? [] : [userId]
-      );
+      const result = db.prepare(query).all(...(isAdmin ? [] : [userId])) as InterventionWithUser[];
 
-      const interventionsWithParsedMedia = parseMedia(result.rows);
+      const interventionsWithParsedMedia = parseMedia(result);
 
       sendSuccess(res, 200, interventionsWithParsedMedia);
     } catch (err) {
@@ -63,6 +61,7 @@ export const interventionsController = {
   
   getIntervention: async (req: AuthRequest, res: Response): Promise<void> => {
     try {
+      const db = getDatabase();
       const { id } = req.params;
 
       if (!id) {
@@ -77,12 +76,12 @@ export const interventionsController = {
         SELECT i.*, u.first_name, u.last_name, u.email
         FROM interventions i
         JOIN users u ON i.user_id = u.id
-        WHERE i.id = $1
+        WHERE i.id = ?
       `;
 
-      const result = await pool.query(query, [id]);
+      const result = db.prepare(query).get([id]);
 
-      if (result.rows.length === 0) {
+      if (!result) {
         res.status(404).json({
           status: 404,
           error: "Intervention record not found",
@@ -90,7 +89,7 @@ export const interventionsController = {
         return;
       }
 
-      const intervention = result.rows[0];
+      const intervention = result as { images: string | null; videos: string | null } | undefined;
 
       const interventionWithParsedMedia = {
         ...intervention,
@@ -114,6 +113,7 @@ export const interventionsController = {
     res: Response
   ): Promise<void> => {
     try {
+      const db = getDatabase();
       const { title, description, latitude, longitude }: CreateRecordData =
         req.body;
       const userId = req.user?.id;
@@ -148,11 +148,10 @@ export const interventionsController = {
 
       const query = `
         INSERT INTO interventions (user_id, title, description, latitude, longitude, images, videos)
-        VALUES ($1, $2, $3, $4, $5, $6, $7)
-        RETURNING id
+        VALUES (?, ?, ?, ?, ?, ?, ?)
       `;
 
-      const result = await pool.query(query, [
+      const result = db.prepare(query).run([
         userId,
         title,
         description,
@@ -165,7 +164,7 @@ export const interventionsController = {
       sendSuccess(
         res,
         201,
-        { id: result.rows[0].id, message: "Created intervention record" }
+        { id: result.lastInsertRowid, message: "Created intervention record" }
       );
     } catch (error) {
       sendError(res, 500, "Server error during intervention creation", error);
@@ -175,6 +174,7 @@ export const interventionsController = {
   
   addMedia: async (req: AuthRequest, res: Response): Promise<void> => {
     try {
+      const db = getDatabase();
       const { id } = req.params;
       const files = req.files as Express.Multer.File[];
 
@@ -194,15 +194,12 @@ export const interventionsController = {
         return;
       }
 
-      
-      const checkQuery =
-        "SELECT user_id, status, images, videos FROM interventions WHERE id = $1";
-      const checkResult = await pool.query(
-        checkQuery,
-        [id]
-      );
 
-      if (checkResult.rows.length === 0) {
+      const checkQuery =
+        "SELECT user_id, status, images, videos FROM interventions WHERE id = ?";
+      const checkResult = db.prepare(checkQuery).get([id]) as { user_id: number; status: string; images: string | null; videos: string | null } | undefined;
+
+      if (!checkResult) {
         res.status(404).json({
           status: 404,
           error: "Intervention record not found",
@@ -210,7 +207,7 @@ export const interventionsController = {
         return;
       }
 
-      const intervention = checkResult.rows[0];
+      const intervention = checkResult;
 
 
       if (intervention?.user_id !== req.user?.id && !req.user?.isAdmin) {
@@ -254,8 +251,8 @@ export const interventionsController = {
 
 
       const updateQuery =
-        "UPDATE interventions SET images = $1, videos = $2 WHERE id = $3";
-      await pool.query(updateQuery, [
+        "UPDATE interventions SET images = ?, videos = ? WHERE id = ?";
+      db.prepare(updateQuery).run([
         updatedImages.length > 0 ? JSON.stringify(updatedImages) : null,
         updatedVideos.length > 0 ? JSON.stringify(updatedVideos) : null,
         id,
@@ -277,6 +274,7 @@ export const interventionsController = {
   
   updateLocation: async (req: AuthRequest, res: Response): Promise<void> => {
     try {
+      const db = getDatabase();
       const { id } = req.params;
       const { latitude, longitude }: UpdateLocationData = req.body;
 
@@ -290,10 +288,10 @@ export const interventionsController = {
 
 
       const checkQuery =
-        "SELECT user_id, status FROM interventions WHERE id = $1";
-      const checkResult = await pool.query(checkQuery, [id]);
+        "SELECT user_id, status FROM interventions WHERE id = ?";
+      const checkResult = db.prepare(checkQuery).get([id]) as { user_id: number; status: string } | undefined;
 
-      if (checkResult.rows.length === 0) {
+      if (!checkResult) {
         res.status(404).json({
           status: 404,
           error: "Intervention record not found",
@@ -301,7 +299,7 @@ export const interventionsController = {
         return;
       }
 
-      const record = checkResult.rows[0];
+      const record = checkResult;
 
 
       if (record?.user_id !== req.user?.id && !req.user?.isAdmin) {
@@ -322,8 +320,8 @@ export const interventionsController = {
       }
 
       const updateQuery =
-        "UPDATE interventions SET latitude = $1, longitude = $2 WHERE id = $3";
-      await pool.query(updateQuery, [latitude, longitude, id]);
+        "UPDATE interventions SET latitude = ?, longitude = ? WHERE id = ?";
+      db.prepare(updateQuery).run([latitude, longitude, id]);
 
       sendSuccess(res, 200, {
         id: parseInt(id),
@@ -341,6 +339,7 @@ export const interventionsController = {
   
   updateComment: async (req: AuthRequest, res: Response): Promise<void> => {
     try {
+      const db = getDatabase();
       const { id } = req.params;
       const { description }: UpdateCommentData = req.body;
 
@@ -354,10 +353,10 @@ export const interventionsController = {
 
 
       const checkQuery =
-        "SELECT user_id, status FROM interventions WHERE id = $1";
-      const checkResult = await pool.query(checkQuery, [id]);
+        "SELECT user_id, status FROM interventions WHERE id = ?";
+      const checkResult = db.prepare(checkQuery).get([id]) as { user_id: number; status: string } | undefined;
 
-      if (checkResult.rows.length === 0) {
+      if (!checkResult) {
         res.status(404).json({
           status: 404,
           error: "Intervention record not found",
@@ -365,7 +364,7 @@ export const interventionsController = {
         return;
       }
 
-      const record = checkResult.rows[0];
+      const record = checkResult;
 
 
       if (record?.user_id !== req.user?.id && !req.user?.isAdmin) {
@@ -386,8 +385,8 @@ export const interventionsController = {
       }
 
       const updateQuery =
-        "UPDATE interventions SET description = $1 WHERE id = $2";
-      await pool.query(updateQuery, [description, id]);
+        "UPDATE interventions SET description = ? WHERE id = ?";
+      db.prepare(updateQuery).run([description, id]);
 
       res.status(200).json({
         status: 200,
@@ -413,6 +412,7 @@ export const interventionsController = {
     res: Response
   ): Promise<void> => {
     try {
+      const db = getDatabase();
       const { id } = req.params;
 
       if (!id) {
@@ -425,13 +425,10 @@ export const interventionsController = {
 
 
       const checkQuery =
-        "SELECT user_id, status FROM interventions WHERE id = $1";
-      const checkResult = await pool.query(
-        checkQuery,
-        [id]
-      );
+        "SELECT user_id, status FROM interventions WHERE id = ?";
+      const checkResult = db.prepare(checkQuery).get([id]) as { user_id: number; status: string } | undefined;
 
-      if (checkResult.rows.length === 0) {
+      if (!checkResult) {
         res.status(404).json({
           status: 404,
           error: "Intervention record not found",
@@ -439,7 +436,7 @@ export const interventionsController = {
         return;
       }
 
-      const record = checkResult.rows[0];
+      const record = checkResult;
 
 
       if (record?.user_id !== req.user?.id && !req.user?.isAdmin) {
@@ -459,8 +456,8 @@ export const interventionsController = {
         return;
       }
 
-      const deleteQuery = "DELETE FROM interventions WHERE id = $1";
-      await pool.query(deleteQuery, [id]);
+      const deleteQuery = "DELETE FROM interventions WHERE id = ?";
+      db.prepare(deleteQuery).run([id]);
 
       sendSuccess(res, 200, {
         id: parseInt(id),
@@ -478,6 +475,7 @@ export const interventionsController = {
   
   updateStatus: async (req: AuthRequest, res: Response): Promise<void> => {
     try {
+      const db = getDatabase();
       const { id } = req.params;
       const { status }: UpdateStatusData = req.body;
 
@@ -500,23 +498,23 @@ export const interventionsController = {
       }
 
 
-      const result = await pool.query(
-        "SELECT i.*, u.email FROM interventions i JOIN users u ON i.user_id = u.id WHERE i.id = $1",
+      const result = db.prepare(
+        "SELECT i.*, u.email FROM interventions i JOIN users u ON i.user_id = u.id WHERE i.id = ?",
         [id]
-      );
+      ).get([id]) as { user_id: number; title: string; status: string; email: string } | undefined;
 
-      if (result.rows.length === 0) {
+      if (!result) {
         res
           .status(404)
           .json({ status: 404, error: "Intervention record not found" });
         return;
       }
-      const report = result.rows[0];
+      const report = result;
 
-      const query = "UPDATE interventions SET status = $1 WHERE id = $2";
-      const updateResult = await pool.query(query, [status, id]);
+      const query = "UPDATE interventions SET status = ? WHERE id = ?";
+      const updateResult = db.prepare(query).run([status, id]);
 
-      if (updateResult.rowCount === 0) {
+      if (updateResult.changes === 0) {
         res.status(404).json({
           status: 404,
           error: "Intervention record not found",
@@ -526,9 +524,9 @@ export const interventionsController = {
       try {
         const notificationQuery = `
           INSERT INTO notifications (user_id, title, message, type, related_entity_type, related_entity_id)
-          VALUES ($1, $2, $3, $4, $5, $6)
+          VALUES (?, ?, ?, ?, ?, ?)
         `;
-        await pool.query(notificationQuery, [
+        db.prepare(notificationQuery).run([
           report.user_id,
           "Report status updated",
           `Your intervention "${report.title}" status changed to "${status}"`,
@@ -577,6 +575,7 @@ export const interventionsController = {
     const startTime = Date.now();
     console.log(`🔄 Starting updateIntervention for ID: ${req.params.id}`);
     try {
+      const db = getDatabase();
       const { id } = req.params;
       const { title, description, latitude, longitude }: CreateRecordData =
         req.body;
@@ -593,14 +592,11 @@ export const interventionsController = {
       console.log(`⏳ Checking record existence...`);
       const checkStart = Date.now();
       const checkQuery =
-        "SELECT user_id, status, images, videos FROM interventions WHERE id = $1";
-      const checkResult = await pool.query(
-        checkQuery,
-        [id]
-      );
+        "SELECT user_id, status, images, videos FROM interventions WHERE id = ?";
+      const checkResult = db.prepare(checkQuery).get([id]) as { user_id: number; status: string; images: string | null; videos: string | null } | undefined;
       console.log(`✅ Record check took ${Date.now() - checkStart}ms`);
 
-      if (checkResult.rows.length === 0) {
+      if (!checkResult) {
         res.status(404).json({
           status: 404,
           error: "Intervention record not found",
@@ -608,7 +604,7 @@ export const interventionsController = {
         return;
       }
 
-      const intervention = checkResult.rows[0];
+      const intervention = checkResult;
 
       if (intervention?.user_id !== req.user?.id && !req.user?.isAdmin) {
         res.status(403).json({
@@ -660,11 +656,11 @@ export const interventionsController = {
       const dbStart = Date.now();
       const updateQuery = `
         UPDATE interventions
-        SET title = $1, description = $2, latitude = $3, longitude = $4, images = $5, videos = $6
-        WHERE id = $7
+        SET title = ?, description = ?, latitude = ?, longitude = ?, images = ?, videos = ?
+        WHERE id = ?
       `;
 
-      await pool.query(updateQuery, [
+      db.prepare(updateQuery).run([
         title,
         description,
         latitude,

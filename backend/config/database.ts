@@ -3,21 +3,20 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+// Always use PostgreSQL
+console.log('🌐 Using PostgreSQL');
+
 const pool = new Pool({
-  host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'postgres',
-  password: process.env.DB_PASSWORD || 'password',
-  database: process.env.DB_NAME || 'ireporter',
-  port: parseInt(process.env.DB_PORT || '5432'),
-  ssl: {
+  connectionString: process.env.DATABASE_URL || 'postgresql://username:password@localhost:5432/ireporter',
+  ssl: process.env.DATABASE_URL && process.env.DATABASE_URL.includes('render.com') ? {
     rejectUnauthorized: false, // Enable SSL for Render Postgres
-  },
-  max: 10, // Maximum number of clients in the pool
+  } : false,
+  max: 10,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 10000,
 });
 
- const testConnection = async () => {
+const testConnection = async () => {
   try {
     const client = await pool.connect();
     console.log("✅ Connected to PostgreSQL database via connection pool");
@@ -29,5 +28,10 @@ const pool = new Pool({
 
 // Test database connection on startup
 testConnection();
+
+export const query = async (sql: string, params: any[] = []) => {
+  const result = await pool.query(sql, params);
+  return result;
+};
 
 export default pool;
