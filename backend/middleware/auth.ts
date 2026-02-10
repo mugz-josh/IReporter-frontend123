@@ -1,6 +1,6 @@
 import { Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import { getDatabase } from "../config/database.local";
+import { query } from "../config/database";
 import { AuthRequest, ApiResponse } from "../types";
 
 export const auth = {
@@ -38,10 +38,8 @@ export const auth = {
         res.status(401).json(response);
         return;
       }
-      const db = getDatabase();
-      const query = "SELECT is_admin FROM users WHERE id = ?";
-      const result = db.prepare(query).get(userId) as any;
-      if (!result || !result.is_admin) {
+      const result = await query("SELECT is_admin FROM users WHERE id = $1", [userId]);
+      if (result.rows.length === 0 || !result.rows[0].is_admin) {
         const response: ApiResponse = {
           status: 403,
           error: "Access denied. Admin privileges required.",
@@ -72,10 +70,8 @@ export const auth = {
           res.status(401).json(response);
           return;
         }
-        const db = getDatabase();
-        const query = `SELECT user_id FROM ${table} WHERE id = ?`;
-        const result = db.prepare(query).get(recordId) as any;
-        if (!result) {
+        const result = await query(`SELECT user_id FROM ${table} WHERE id = $1`, [recordId]);
+        if (result.rows.length === 0) {
           const response: ApiResponse = {
             status: 404,
             error: "Record not found",
@@ -83,7 +79,7 @@ export const auth = {
           res.status(404).json(response);
           return;
         }
-        if (result.user_id !== userId && !req.user?.isAdmin) {
+        if (result.rows[0].user_id !== userId && !req.user?.isAdmin) {
           const response: ApiResponse = {
             status: 403,
             error: "Access denied. You can only modify your own records.",

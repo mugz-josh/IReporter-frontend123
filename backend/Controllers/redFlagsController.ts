@@ -1,7 +1,7 @@
 
 
 import { Response } from "express";
-import { getDatabase } from "../config/database.local";
+import { query } from "../config/database";
 import {
   AuthRequest,
   CreateRecordData,
@@ -27,11 +27,10 @@ import {
 export const redFlagsController = {
   getAllRedFlags: async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-      const db = getDatabase();
       const userId = req.user?.id;
       const isAdmin = req.user?.isAdmin;
 
-      const query = isAdmin
+      const sql = isAdmin
         ? `
           SELECT rf.*, u.first_name, u.last_name, u.email
           FROM red_flags rf
@@ -42,13 +41,13 @@ export const redFlagsController = {
           SELECT rf.*, u.first_name, u.last_name, u.email
           FROM red_flags rf
           JOIN users u ON rf.user_id = u.id
-          WHERE rf.user_id = ?
+          WHERE rf.user_id = $1
           ORDER BY rf.created_at DESC
         `;
 
-      const result = db.prepare(query).all(...(isAdmin ? [] : [userId])) as RedFlagWithUser[];
+      const result = await query(sql, isAdmin ? [] : [userId]);
 
-      const redFlagsWithParsedMedia = parseMedia(result);
+      const redFlagsWithParsedMedia = parseMedia(result.rows);
 
       sendSuccess(res, 200, redFlagsWithParsedMedia);
     } catch (err) {
@@ -58,7 +57,6 @@ export const redFlagsController = {
 
   getRedFlag: async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-      const db = getDatabase();
       const { id } = req.params;
 
       if (!id) {
@@ -69,16 +67,16 @@ export const redFlagsController = {
         return;
       }
 
-      const query = `
+      const sql = `
         SELECT rf.*, u.first_name, u.last_name, u.email
         FROM red_flags rf
         JOIN users u ON rf.user_id = u.id
-        WHERE rf.id = ?
+        WHERE rf.id = $1
       `;
 
-      const result = db.prepare(query).get(id) as RedFlagWithUser | undefined;
+      const result = await query(sql, [id]);
 
-      if (!result) {
+      if (result.rows.length === 0) {
         res.status(404).json({
           status: 404,
           error: "Red-flag record not found",
@@ -86,7 +84,7 @@ export const redFlagsController = {
         return;
       }
 
-      const redFlag = result;
+      const redFlag = result.rows[0];
 
       const redFlagWithParsedMedia = {
         ...redFlag,
@@ -106,7 +104,6 @@ export const redFlagsController = {
 
   createRedFlag: async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-      const db = getDatabase();
       const { title, description, latitude, longitude }: CreateRecordData =
         req.body;
       const userId = req.user?.id;
@@ -139,25 +136,24 @@ export const redFlagsController = {
           ? processMediaFiles(validFiles)
           : { images: [], videos: [], audio: [] };
 
-      const query = `
-        INSERT INTO red_flags (user_id, title, description, latitude, longitude, images, videos)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+      const sql = `
+        INSERT INTO red_flags (user_id, title, description, latitude, longitude)
+        VALUES ($1, $2, $3, $4, $5)
+        RETURNING id
       `;
 
-      const result = db.prepare(query).run([
+      const result = await query(sql, [
         userId,
         title,
         description,
         latitude,
         longitude,
-        media.images.length > 0 ? JSON.stringify(media.images) : null,
-        media.videos.length > 0 ? JSON.stringify(media.videos) : null,
       ]);
 
       sendSuccess(
         res,
         201,
-        { id: result.lastInsertRowid, message: "Created red-flag record" }
+        { id: result.rows[0].id, message: "Created red-flag record" }
       );
     } catch (error) {
       sendError(res, 500, "Server error during red-flag creation", error);
@@ -166,7 +162,6 @@ export const redFlagsController = {
 
   addMedia: async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-      const db = getDatabase();
       const { id } = req.params;
       const files = req.files as Express.Multer.File[];
 
@@ -186,11 +181,11 @@ export const redFlagsController = {
         return;
       }
 
-      const checkQuery =
-        "SELECT user_id, status, images, videos FROM red_flags WHERE id = ?";
-      const checkResult = db.prepare(checkQuery).get(id) as any;
+      const checkSql =
+        "SELECT user_id, status, images, videos FROM red_flags WHERE id = $1";
+      const checkResult = await query(checkSql, [id]);
 
-      if (!checkResult) {
+      if (checkResult.rows.length === 0) {
         res.status(404).json({
           status: 404,
           error: "Red-flag record not found",
@@ -198,7 +193,7 @@ export const redFlagsController = {
         return;
       }
 
-      const redFlag = checkResult;
+      const redFlag = checkResult.rows[0];
 
       if (redFlag.user_id !== req.user?.id && !req.user?.isAdmin) {
         res.status(403).json({
@@ -233,9 +228,9 @@ export const redFlagsController = {
       const updatedImages = [...existingImages, ...newImages];
       const updatedVideos = [...existingVideos, ...newVideos];
 
-      const updateQuery =
-        "UPDATE red_flags SET images = ?, videos = ?, audio = ? WHERE id = ?";
-      db.prepare(updateQuery).run([
+      const updateSql =
+        "UPDATE red_flags SET images = $1, videos = $2, audio = $3 WHERE id = $4";
+      await query(updateSql, [
         updatedImages.length > 0 ? JSON.stringify(updatedImages) : null,
         updatedVideos.length > 0 ? JSON.stringify(updatedVideos) : null,
         null,
@@ -257,7 +252,6 @@ export const redFlagsController = {
 
   updateLocation: async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-      const db = getDatabase();
       const { id } = req.params;
       const { latitude, longitude }: UpdateLocationData = req.body;
 
@@ -269,10 +263,10 @@ export const redFlagsController = {
         return;
       }
 
-      const checkQuery = "SELECT user_id, status FROM red_flags WHERE id = ?";
-      const checkResult = db.prepare(checkQuery).get(id) as { user_id: number; status: string } | undefined;
+      const checkSql = "SELECT user_id, status FROM red_flags WHERE id = $1";
+      const checkResult = await query(checkSql, [id]);
 
-      if (!checkResult) {
+      if (checkResult.rows.length === 0) {
         res.status(404).json({
           status: 404,
           error: "Red-flag record not found",
@@ -280,7 +274,7 @@ export const redFlagsController = {
         return;
       }
 
-      const record = checkResult;
+      const record = checkResult.rows[0];
 
       if (record.user_id !== req.user?.id && !req.user?.isAdmin) {
         res.status(403).json({
@@ -299,9 +293,9 @@ export const redFlagsController = {
         return;
       }
 
-      const updateQuery =
-        "UPDATE red_flags SET latitude = ?, longitude = ? WHERE id = ?";
-      db.prepare(updateQuery).run([latitude, longitude, id]);
+      const updateSql =
+        "UPDATE red_flags SET latitude = $1, longitude = $2 WHERE id = $3";
+      await query(updateSql, [latitude, longitude, id]);
 
       res.status(200).json({
         status: 200,
@@ -323,7 +317,6 @@ export const redFlagsController = {
 
   updateComment: async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-      const db = getDatabase();
       const { id } = req.params;
       const { description }: UpdateCommentData = req.body;
 
@@ -335,10 +328,10 @@ export const redFlagsController = {
         return;
       }
 
-      const checkQuery = "SELECT user_id, status FROM red_flags WHERE id = ?";
-      const checkResult = db.prepare(checkQuery).get(id) as { user_id: number; status: string } | undefined;
+      const checkSql = "SELECT user_id, status FROM red_flags WHERE id = $1";
+      const checkResult = await query(checkSql, [id]);
 
-      if (!checkResult) {
+      if (checkResult.rows.length === 0) {
         res.status(404).json({
           status: 404,
           error: "Red-flag record not found",
@@ -346,7 +339,7 @@ export const redFlagsController = {
         return;
       }
 
-      const record = checkResult;
+      const record = checkResult.rows[0];
 
       if (record.user_id !== req.user?.id && !req.user?.isAdmin) {
         res.status(403).json({
@@ -365,8 +358,8 @@ export const redFlagsController = {
         return;
       }
 
-      const updateQuery = "UPDATE red_flags SET description = ? WHERE id = ?";
-      db.prepare(updateQuery).run([description, id]);
+      const updateSql = "UPDATE red_flags SET description = $1 WHERE id = $2";
+      await query(updateSql, [description, id]);
 
       sendSuccess(res, 200, {
         id: parseInt(id),
@@ -383,7 +376,6 @@ export const redFlagsController = {
 
   deleteRedFlag: async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-      const db = getDatabase();
       const { id } = req.params;
 
       if (!id) {
@@ -394,10 +386,10 @@ export const redFlagsController = {
         return;
       }
 
-      const checkQuery = "SELECT user_id, status FROM red_flags WHERE id = ?";
-      const checkResult = db.prepare(checkQuery).get(id) as { user_id: number; status: string } | undefined;
+      const checkSql = "SELECT user_id, status FROM red_flags WHERE id = $1";
+      const checkResult = await query(checkSql, [id]);
 
-      if (!checkResult) {
+      if (checkResult.rows.length === 0) {
         res.status(404).json({
           status: 404,
           error: "Red-flag record not found",
@@ -405,7 +397,7 @@ export const redFlagsController = {
         return;
       }
 
-      const record = checkResult;
+      const record = checkResult.rows[0];
 
       if (record.user_id !== req.user?.id && !req.user?.isAdmin) {
         res.status(403).json({
@@ -424,8 +416,8 @@ export const redFlagsController = {
         return;
       }
 
-      const deleteQuery = "DELETE FROM red_flags WHERE id = ?";
-      db.prepare(deleteQuery).run([id]);
+      const deleteSql = "DELETE FROM red_flags WHERE id = $1";
+      await query(deleteSql, [id]);
 
       sendSuccess(res, 200, {
         id: parseInt(id),
@@ -442,7 +434,6 @@ export const redFlagsController = {
 
   updateStatus: async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-      const db = getDatabase();
       const { id } = req.params;
       const { status }: UpdateStatusData = req.body;
 
@@ -464,27 +455,28 @@ export const redFlagsController = {
         return;
       }
 
-      const result = db.prepare(
-        "SELECT rf.*, u.email FROM red_flags rf JOIN users u ON rf.user_id = u.id WHERE rf.id = ?"
-      ).get(id) as { user_id: number; title: string; status: string; email: string } | undefined;
+      const result = await query(
+        "SELECT rf.*, u.email FROM red_flags rf JOIN users u ON rf.user_id = u.id WHERE rf.id = $1",
+        [id]
+      );
 
-      if (!result) {
+      if (result.rows.length === 0) {
         res
           .status(404)
           .json({ status: 404, error: "Red-flag record not found" });
         return;
       }
-      const report = result as {
+      const report = result.rows[0] as {
         user_id: number;
         title: string;
         email: string;
         status: string;
       };
 
-      const query = "UPDATE red_flags SET status = ? WHERE id = ?";
-      const updateResult = db.prepare(query).run([status, id]);
+      const updateSql = "UPDATE red_flags SET status = $1 WHERE id = $2";
+      const updateResult = await query(updateSql, [status, id]);
 
-      if (updateResult.changes === 0) {
+      if (updateResult.rowCount === 0) {
         res.status(404).json({
           status: 404,
           error: "Red-flag record not found",
@@ -492,11 +484,11 @@ export const redFlagsController = {
         return;
       }
       try {
-        const notificationQuery = `
+        const notificationSql = `
           INSERT INTO notifications (user_id, title, message, type, related_entity_type, related_entity_id)
-          VALUES (?, ?, ?, ?, ?, ?)
+          VALUES ($1, $2, $3, $4, $5, $6)
         `;
-        db.prepare(notificationQuery).run([
+        await query(notificationSql, [
           report.user_id,
           "Report status updated",
           `Your report "${report.title}" status changed to "${status}"`,
@@ -534,14 +526,14 @@ export const redFlagsController = {
       if (status === "under-investigation") {
         try {
           // Get full report data for government API
-          const fullReportQuery = `
+          const fullReportSql = `
             SELECT rf.*, u.email
             FROM red_flags rf
             JOIN users u ON rf.user_id = u.id
-            WHERE rf.id = ?
+            WHERE rf.id = $1
           `;
-          const fullReportResult = db.prepare(fullReportQuery).get(id) as { title: string; description: string; latitude: number; longitude: number; images: string | null; videos: string | null; email: string; created_at: Date } | undefined;
-          const fullReport = fullReportResult;
+          const fullReportResult = await query(fullReportSql, [id]);
+          const fullReport = fullReportResult.rows[0];
 
           if (!fullReport) {
             console.warn(`Failed to retrieve full report data for red flag ${id}`);
@@ -592,7 +584,6 @@ export const redFlagsController = {
     const startTime = Date.now();
     console.log(`🔄 Starting updateRedFlag for ID: ${req.params.id}`);
     try {
-      const db = getDatabase();
       const { id } = req.params;
       const { title, description, latitude, longitude }: CreateRecordData =
         req.body;
@@ -608,12 +599,12 @@ export const redFlagsController = {
 
       console.log(`⏳ Checking record existence...`);
       const checkStart = Date.now();
-      const checkQuery =
-        "SELECT user_id, status, images, videos, audio FROM red_flags WHERE id = ?";
-      const checkResult = db.prepare(checkQuery).get(id) as { user_id: number; status: string; images: string | null; videos: string | null; audio: string | null } | undefined;
+      const checkSql =
+        "SELECT user_id, status, images, videos, audio FROM red_flags WHERE id = $1";
+      const checkResult = await query(checkSql, [id]);
       console.log(`✅ Record check took ${Date.now() - checkStart}ms`);
 
-      if (!checkResult) {
+      if (checkResult.rows.length === 0) {
         res.status(404).json({
           status: 404,
           error: "Red-flag record not found",
@@ -621,7 +612,7 @@ export const redFlagsController = {
         return;
       }
 
-      const redFlag = checkResult;
+      const redFlag = checkResult.rows[0];
 
       if (redFlag.user_id !== req.user?.id && !req.user?.isAdmin) {
         res.status(403).json({
@@ -667,13 +658,13 @@ export const redFlagsController = {
 
       console.log(`💾 Updating database...`);
       const dbStart = Date.now();
-      const updateQuery = `
+      const updateSql = `
         UPDATE red_flags
-        SET title = ?, description = ?, latitude = ?, longitude = ?, images = ?, videos = ?
-        WHERE id = ?
+        SET title = $1, description = $2, latitude = $3, longitude = $4, images = $5, videos = $6
+        WHERE id = $7
       `;
 
-      db.prepare(updateQuery).run([
+      await query(updateSql, [
         title,
         description,
         latitude,

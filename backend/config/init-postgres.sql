@@ -21,6 +21,9 @@ CREATE TABLE IF NOT EXISTS red_flags (
   latitude DECIMAL(10, 8),
   longitude DECIMAL(11, 8),
   status VARCHAR(50) DEFAULT 'draft',
+  images TEXT,
+  videos TEXT,
+  audio TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -85,6 +88,11 @@ CREATE TABLE IF NOT EXISTS notifications (
 INSERT INTO users (first_name, last_name, email, password, is_admin)
 VALUES ('Mugisha', 'Joshua', 'Mollyadmin@ireporter.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', true)
 ON CONFLICT (email) DO NOTHING;
+
+-- Add missing columns to red_flags table if they don't exist
+ALTER TABLE red_flags ADD COLUMN IF NOT EXISTS images TEXT;
+ALTER TABLE red_flags ADD COLUMN IF NOT EXISTS videos TEXT;
+ALTER TABLE red_flags ADD COLUMN IF NOT EXISTS audio TEXT;
 
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_red_flags_user_id ON red_flags(user_id);
