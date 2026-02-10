@@ -71,6 +71,8 @@ function createTables(): void {
       latitude REAL,
       longitude REAL,
       status TEXT DEFAULT 'draft',
+      images TEXT,
+      videos TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (user_id) REFERENCES users (id)

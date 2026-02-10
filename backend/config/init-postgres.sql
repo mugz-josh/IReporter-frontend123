@@ -37,6 +37,8 @@ CREATE TABLE IF NOT EXISTS interventions (
   latitude DECIMAL(10, 8),
   longitude DECIMAL(11, 8),
   status VARCHAR(50) DEFAULT 'draft',
+  images TEXT,
+  videos TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -93,6 +95,10 @@ ON CONFLICT (email) DO NOTHING;
 ALTER TABLE red_flags ADD COLUMN IF NOT EXISTS images TEXT;
 ALTER TABLE red_flags ADD COLUMN IF NOT EXISTS videos TEXT;
 ALTER TABLE red_flags ADD COLUMN IF NOT EXISTS audio TEXT;
+
+-- Add missing columns to interventions table if they don't exist
+ALTER TABLE interventions ADD COLUMN IF NOT EXISTS images TEXT;
+ALTER TABLE interventions ADD COLUMN IF NOT EXISTS videos TEXT;
 
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_red_flags_user_id ON red_flags(user_id);

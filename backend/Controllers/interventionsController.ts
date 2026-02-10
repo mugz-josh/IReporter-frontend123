@@ -1,6 +1,6 @@
 
 import { Response } from "express";
-import { getDatabase } from "../config/database.local";
+import { query } from "../config/database";
 import {
   AuthRequest,
   CreateRecordData,
@@ -29,12 +29,10 @@ export const interventionsController = {
     res: Response
   ): Promise<void> => {
     try {
-      const db = getDatabase();
       const userId = req.user?.id;
       const isAdmin = req.user?.isAdmin;
 
-
-      const query = isAdmin
+      const sql = isAdmin
         ? `
           SELECT i.*, u.first_name, u.last_name, u.email
           FROM interventions i
@@ -45,13 +43,13 @@ export const interventionsController = {
           SELECT i.*, u.first_name, u.last_name, u.email
           FROM interventions i
           JOIN users u ON i.user_id = u.id
-          WHERE i.user_id = ?
+          WHERE i.user_id = $1
           ORDER BY i.created_at DESC
         `;
 
-      const result = db.prepare(query).all(...(isAdmin ? [] : [userId])) as InterventionWithUser[];
+      const result = await query(sql, isAdmin ? [] : [userId]);
 
-      const interventionsWithParsedMedia = parseMedia(result);
+      const interventionsWithParsedMedia = parseMedia(result.rows);
 
       sendSuccess(res, 200, interventionsWithParsedMedia);
     } catch (err) {
@@ -62,7 +60,6 @@ export const interventionsController = {
   
   getIntervention: async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-      const db = getDatabase();
       const { id } = req.params;
 
       if (!id) {
@@ -73,16 +70,16 @@ export const interventionsController = {
         return;
       }
 
-      const query = `
+      const sql = `
         SELECT i.*, u.first_name, u.last_name, u.email
         FROM interventions i
         JOIN users u ON i.user_id = u.id
-        WHERE i.id = ?
+        WHERE i.id = $1
       `;
 
-      const result = db.prepare(query).get([id]);
+      const result = await query(sql, [id]);
 
-      if (!result) {
+      if (result.rows.length === 0) {
         res.status(404).json({
           status: 404,
           error: "Intervention record not found",
@@ -90,12 +87,12 @@ export const interventionsController = {
         return;
       }
 
-      const intervention = result as { images: string | null; videos: string | null } | undefined;
+      const intervention = result.rows[0];
 
       const interventionWithParsedMedia = {
         ...intervention,
         images: intervention?.images ? JSON.parse(intervention.images) : [],
-        videos: intervention?.videos ? JSON.parse(intervention?.videos) : [],
+        videos: intervention?.videos ? JSON.parse(intervention.videos) : [],
       };
 
       sendSuccess(res, 200, interventionWithParsedMedia);
@@ -114,7 +111,6 @@ export const interventionsController = {
     res: Response
   ): Promise<void> => {
     try {
-      const db = getDatabase();
       const { title, description, latitude, longitude }: CreateRecordData =
         req.body;
       const userId = req.user?.id;
@@ -147,12 +143,13 @@ export const interventionsController = {
           ? processMediaFiles(validFiles)
           : { images: [], videos: [] };
 
-      const query = `
+      const sql = `
         INSERT INTO interventions (user_id, title, description, latitude, longitude, images, videos)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        RETURNING id
       `;
 
-      const result = db.prepare(query).run([
+      const result = await query(sql, [
         userId,
         title,
         description,
@@ -165,7 +162,7 @@ export const interventionsController = {
       sendSuccess(
         res,
         201,
-        { id: result.lastInsertRowid, message: "Created intervention record" }
+        { id: result.rows[0].id, message: "Created intervention record" }
       );
     } catch (error) {
       sendError(res, 500, "Server error during intervention creation", error);
@@ -175,7 +172,6 @@ export const interventionsController = {
   
   addMedia: async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-      const db = getDatabase();
       const { id } = req.params;
       const files = req.files as Express.Multer.File[];
 
@@ -195,12 +191,11 @@ export const interventionsController = {
         return;
       }
 
+      const checkSql =
+        "SELECT user_id, status, images, videos FROM interventions WHERE id = $1";
+      const checkResult = await query(checkSql, [id]);
 
-      const checkQuery =
-        "SELECT user_id, status, images, videos FROM interventions WHERE id = ?";
-      const checkResult = db.prepare(checkQuery).get([id]) as { user_id: number; status: string; images: string | null; videos: string | null } | undefined;
-
-      if (!checkResult) {
+      if (checkResult.rows.length === 0) {
         res.status(404).json({
           status: 404,
           error: "Intervention record not found",
@@ -208,10 +203,9 @@ export const interventionsController = {
         return;
       }
 
-      const intervention = checkResult;
+      const intervention = checkResult.rows[0];
 
-
-      if (intervention?.user_id !== req.user?.id && !req.user?.isAdmin) {
+      if (intervention.user_id !== req.user?.id && !req.user?.isAdmin) {
         res.status(403).json({
           status: 403,
           error: "Access denied. You can only modify your own records.",
@@ -219,8 +213,7 @@ export const interventionsController = {
         return;
       }
 
-
-      if (intervention?.status !== "draft") {
+      if (intervention.status !== "draft") {
         res.status(403).json({
           status: 403,
           error:
@@ -229,7 +222,6 @@ export const interventionsController = {
         return;
       }
 
-
       const imageFiles = files.filter((file) =>
         file.mimetype.startsWith("image/")
       );
@@ -237,12 +229,8 @@ export const interventionsController = {
         file.mimetype.startsWith("video/")
       );
 
-      const existingImages = intervention.images
-        ? JSON.parse(intervention.images)
-        : [];
-      const existingVideos = intervention.videos
-        ? JSON.parse(intervention.videos)
-        : [];
+      const existingImages = intervention.images ? JSON.parse(intervention.images) : [];
+      const existingVideos = intervention.videos ? JSON.parse(intervention.videos) : [];
 
       const newImages = imageFiles.map((file) => file.filename);
       const newVideos = videoFiles.map((file) => file.filename);
@@ -250,10 +238,9 @@ export const interventionsController = {
       const updatedImages = [...existingImages, ...newImages];
       const updatedVideos = [...existingVideos, ...newVideos];
 
-
-      const updateQuery =
-        "UPDATE interventions SET images = ?, videos = ? WHERE id = ?";
-      db.prepare(updateQuery).run([
+      const updateSql =
+        "UPDATE interventions SET images = $1, videos = $2 WHERE id = $3";
+      await query(updateSql, [
         updatedImages.length > 0 ? JSON.stringify(updatedImages) : null,
         updatedVideos.length > 0 ? JSON.stringify(updatedVideos) : null,
         id,
@@ -275,7 +262,6 @@ export const interventionsController = {
   
   updateLocation: async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-      const db = getDatabase();
       const { id } = req.params;
       const { latitude, longitude }: UpdateLocationData = req.body;
 
@@ -287,12 +273,10 @@ export const interventionsController = {
         return;
       }
 
+      const checkSql = "SELECT user_id, status FROM interventions WHERE id = $1";
+      const checkResult = await query(checkSql, [id]);
 
-      const checkQuery =
-        "SELECT user_id, status FROM interventions WHERE id = ?";
-      const checkResult = db.prepare(checkQuery).get([id]) as { user_id: number; status: string } | undefined;
-
-      if (!checkResult) {
+      if (checkResult.rows.length === 0) {
         res.status(404).json({
           status: 404,
           error: "Intervention record not found",
@@ -300,10 +284,9 @@ export const interventionsController = {
         return;
       }
 
-      const record = checkResult;
+      const record = checkResult.rows[0];
 
-
-      if (record?.user_id !== req.user?.id && !req.user?.isAdmin) {
+      if (record.user_id !== req.user?.id && !req.user?.isAdmin) {
         res.status(403).json({
           status: 403,
           error: "Access denied. You can only modify your own records.",
@@ -311,7 +294,7 @@ export const interventionsController = {
         return;
       }
 
-      if (record?.status !== "draft") {
+      if (record.status !== "draft") {
         res.status(403).json({
           status: 403,
           error:
@@ -320,9 +303,9 @@ export const interventionsController = {
         return;
       }
 
-      const updateQuery =
-        "UPDATE interventions SET latitude = ?, longitude = ? WHERE id = ?";
-      db.prepare(updateQuery).run([latitude, longitude, id]);
+      const updateSql =
+        "UPDATE interventions SET latitude = $1, longitude = $2 WHERE id = $3";
+      await query(updateSql, [latitude, longitude, id]);
 
       sendSuccess(res, 200, {
         id: parseInt(id),
@@ -340,7 +323,6 @@ export const interventionsController = {
   
   updateComment: async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-      const db = getDatabase();
       const { id } = req.params;
       const { description }: UpdateCommentData = req.body;
 
@@ -352,12 +334,10 @@ export const interventionsController = {
         return;
       }
 
+      const checkSql = "SELECT user_id, status FROM interventions WHERE id = $1";
+      const checkResult = await query(checkSql, [id]);
 
-      const checkQuery =
-        "SELECT user_id, status FROM interventions WHERE id = ?";
-      const checkResult = db.prepare(checkQuery).get([id]) as { user_id: number; status: string } | undefined;
-
-      if (!checkResult) {
+      if (checkResult.rows.length === 0) {
         res.status(404).json({
           status: 404,
           error: "Intervention record not found",
@@ -365,10 +345,9 @@ export const interventionsController = {
         return;
       }
 
-      const record = checkResult;
+      const record = checkResult.rows[0];
 
-
-      if (record?.user_id !== req.user?.id && !req.user?.isAdmin) {
+      if (record.user_id !== req.user?.id && !req.user?.isAdmin) {
         res.status(403).json({
           status: 403,
           error: "Access denied. You can only modify your own records.",
@@ -376,7 +355,7 @@ export const interventionsController = {
         return;
       }
 
-      if (record?.status !== "draft") {
+      if (record.status !== "draft") {
         res.status(403).json({
           status: 403,
           error:
@@ -385,18 +364,12 @@ export const interventionsController = {
         return;
       }
 
-      const updateQuery =
-        "UPDATE interventions SET description = ? WHERE id = ?";
-      db.prepare(updateQuery).run([description, id]);
+      const updateSql = "UPDATE interventions SET description = $1 WHERE id = $2";
+      await query(updateSql, [description, id]);
 
-      res.status(200).json({
-        status: 200,
-        data: [
-          {
-            id: parseInt(id),
-            message: "Updated intervention record's comment",
-          },
-        ],
+      sendSuccess(res, 200, {
+        id: parseInt(id),
+        message: "Updated intervention record's comment",
       });
     } catch (error) {
       console.error("Error updating comment:", error);
@@ -413,7 +386,6 @@ export const interventionsController = {
     res: Response
   ): Promise<void> => {
     try {
-      const db = getDatabase();
       const { id } = req.params;
 
       if (!id) {
@@ -424,12 +396,10 @@ export const interventionsController = {
         return;
       }
 
+      const checkSql = "SELECT user_id, status FROM interventions WHERE id = $1";
+      const checkResult = await query(checkSql, [id]);
 
-      const checkQuery =
-        "SELECT user_id, status FROM interventions WHERE id = ?";
-      const checkResult = db.prepare(checkQuery).get([id]) as { user_id: number; status: string } | undefined;
-
-      if (!checkResult) {
+      if (checkResult.rows.length === 0) {
         res.status(404).json({
           status: 404,
           error: "Intervention record not found",
@@ -437,10 +407,9 @@ export const interventionsController = {
         return;
       }
 
-      const record = checkResult;
+      const record = checkResult.rows[0];
 
-
-      if (record?.user_id !== req.user?.id && !req.user?.isAdmin) {
+      if (record.user_id !== req.user?.id && !req.user?.isAdmin) {
         res.status(403).json({
           status: 403,
           error: "Access denied. You can only delete your own records.",
@@ -448,7 +417,7 @@ export const interventionsController = {
         return;
       }
 
-      if (record?.status !== "draft") {
+      if (record.status !== "draft") {
         res.status(403).json({
           status: 403,
           error:
@@ -457,8 +426,8 @@ export const interventionsController = {
         return;
       }
 
-      const deleteQuery = "DELETE FROM interventions WHERE id = ?";
-      db.prepare(deleteQuery).run([id]);
+      const deleteSql = "DELETE FROM interventions WHERE id = $1";
+      await query(deleteSql, [id]);
 
       sendSuccess(res, 200, {
         id: parseInt(id),
@@ -476,7 +445,6 @@ export const interventionsController = {
   
   updateStatus: async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-      const db = getDatabase();
       const { id } = req.params;
       const { status }: UpdateStatusData = req.body;
 
@@ -498,23 +466,28 @@ export const interventionsController = {
         return;
       }
 
+      const result = await query(
+        "SELECT i.*, u.email FROM interventions i JOIN users u ON i.user_id = u.id WHERE i.id = $1",
+        [id]
+      );
 
-      const result = db.prepare(
-        "SELECT i.*, u.email FROM interventions i JOIN users u ON i.user_id = u.id WHERE i.id = ?"
-      ).get(id) as { user_id: number; title: string; status: string; email: string } | undefined;
-
-      if (!result) {
+      if (result.rows.length === 0) {
         res
           .status(404)
           .json({ status: 404, error: "Intervention record not found" });
         return;
       }
-      const report = result;
+      const report = result.rows[0] as {
+        user_id: number;
+        title: string;
+        email: string;
+        status: string;
+      };
 
-      const query = "UPDATE interventions SET status = ? WHERE id = ?";
-      const updateResult = db.prepare(query).run([status, id]);
+      const updateSql = "UPDATE interventions SET status = $1 WHERE id = $2";
+      const updateResult = await query(updateSql, [status, id]);
 
-      if (updateResult.changes === 0) {
+      if (updateResult.rowCount === 0) {
         res.status(404).json({
           status: 404,
           error: "Intervention record not found",
@@ -522,11 +495,11 @@ export const interventionsController = {
         return;
       }
       try {
-        const notificationQuery = `
+        const notificationSql = `
           INSERT INTO notifications (user_id, title, message, type, related_entity_type, related_entity_id)
-          VALUES (?, ?, ?, ?, ?, ?)
+          VALUES ($1, $2, $3, $4, $5, $6)
         `;
-        db.prepare(notificationQuery).run([
+        await query(notificationSql, [
           report.user_id,
           "Report status updated",
           `Your intervention "${report.title}" status changed to "${status}"`,
@@ -537,11 +510,10 @@ export const interventionsController = {
       } catch (nErr) {
         console.error(
           "Failed to create notification after status change:",
-
         );
       }
 
-   try {
+      try {
         await EmailService.sendReportStatusNotification(
           report.email,
           "intervention",
@@ -551,7 +523,6 @@ export const interventionsController = {
         );
       } catch (emailError) {
         console.error("Failed to send email notification:", emailError);
-
       }
 
       sendSuccess(res, 200, {
@@ -575,7 +546,6 @@ export const interventionsController = {
     const startTime = Date.now();
     console.log(`🔄 Starting updateIntervention for ID: ${req.params.id}`);
     try {
-      const db = getDatabase();
       const { id } = req.params;
       const { title, description, latitude, longitude }: CreateRecordData =
         req.body;
@@ -591,12 +561,12 @@ export const interventionsController = {
 
       console.log(`⏳ Checking record existence...`);
       const checkStart = Date.now();
-      const checkQuery =
-        "SELECT user_id, status, images, videos FROM interventions WHERE id = ?";
-      const checkResult = db.prepare(checkQuery).get([id]) as { user_id: number; status: string; images: string | null; videos: string | null } | undefined;
+      const checkSql =
+        "SELECT user_id, status, images, videos FROM interventions WHERE id = $1";
+      const checkResult = await query(checkSql, [id]);
       console.log(`✅ Record check took ${Date.now() - checkStart}ms`);
 
-      if (!checkResult) {
+      if (checkResult.rows.length === 0) {
         res.status(404).json({
           status: 404,
           error: "Intervention record not found",
@@ -604,9 +574,9 @@ export const interventionsController = {
         return;
       }
 
-      const intervention = checkResult;
+      const intervention = checkResult.rows[0];
 
-      if (intervention?.user_id !== req.user?.id && !req.user?.isAdmin) {
+      if (intervention.user_id !== req.user?.id && !req.user?.isAdmin) {
         res.status(403).json({
           status: 403,
           error: "Access denied. You can only modify your own records.",
@@ -614,7 +584,7 @@ export const interventionsController = {
         return;
       }
 
-      if (intervention?.status !== "draft") {
+      if (intervention.status !== "draft") {
         res.status(403).json({
           status: 403,
           error:
@@ -623,12 +593,8 @@ export const interventionsController = {
         return;
       }
 
-      let updatedImages = intervention.images
-        ? JSON.parse(intervention.images)
-        : [];
-      let updatedVideos = intervention.videos
-        ? JSON.parse(intervention.videos)
-        : [];
+      let updatedImages = intervention.images ? JSON.parse(intervention.images) : [];
+      let updatedVideos = intervention.videos ? JSON.parse(intervention.videos) : [];
 
       if (files && files.length > 0) {
         console.log(`📁 Processing ${files.length} files...`);
@@ -654,13 +620,13 @@ export const interventionsController = {
 
       console.log(`💾 Updating database...`);
       const dbStart = Date.now();
-      const updateQuery = `
+      const updateSql = `
         UPDATE interventions
-        SET title = ?, description = ?, latitude = ?, longitude = ?, images = ?, videos = ?
-        WHERE id = ?
+        SET title = $1, description = $2, latitude = $3, longitude = $4, images = $5, videos = $6
+        WHERE id = $7
       `;
 
-      db.prepare(updateQuery).run([
+      await query(updateSql, [
         title,
         description,
         latitude,
