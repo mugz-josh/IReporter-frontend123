@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import "../components/ui/styles/components.css";
+import { Footer } from "@/components/Footer";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import LanguageSelector from "@/components/LanguageSelector";
 import {
@@ -27,6 +28,10 @@ import {
   ExternalLink,
   Volume2,
   VolumeX,
+  Facebook,
+  Twitter,
+  Instagram,
+  Linkedin,
 } from "lucide-react";
 
 const Homepage: React.FC = () => {
@@ -111,11 +116,11 @@ const handleSignup = () => {
           backgroundRepeat: "no-repeat",
         }}
       >
-        <div className="hero-overlay" />
+        <div className="hero-overlay" style={{ background: 'linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4))' }} />
         <div className="hero-content">
           <div className="hero-badge">
-            <Shield size={16} />
-            Trusted by 10,000+ Citizens
+            <Star size={16} />
+            Trusted by 10,000+ Citizens across Africa
           </div>
           <h1 className="hero-title">
             {t('hero.title')}
@@ -124,18 +129,18 @@ const handleSignup = () => {
             {t('hero.description')}
           </p>
           <div className="hero-buttons">
-            <button className="btn-primary btn-lg" onClick={handleSignup}>
-              {t('createAccountBtn')}
+            <button className="btn-primary btn-lg" style={{ background: 'hsl(var(--destructive))', color: 'white' }} onClick={handleSignup}>
+              Report an Issue
             </button>
             <button
               className="btn-secondary btn-lg"
               onClick={() =>
                 document
-                  .getElementById("features")
+                  .getElementById("how-it-works")
                   ?.scrollIntoView({ behavior: "smooth" })
               }
             >
-              Learn More
+              Learn How It Works
             </button>
             <button
               className="btn-outline btn-lg"
@@ -224,37 +229,30 @@ const handleSignup = () => {
 
       
       <section id="how-it-works" className="process-section">
-        <h2 className="section-title">{t('simpleProcess')}</h2>
+        <h2 className="section-title">How It Works</h2>
         <p className="section-subtitle">
-          From report to resolution in four easy steps
+          From report to resolution in three simple steps
         </p>
         <div className="process-steps">
           <div className="process-step">
             <div className="step-number">1</div>
-            <h3 className="step-title">{t('createAccount')}</h3>
+            <h3 className="step-title">Report an Issue</h3>
             <p className="step-description">
-              Sign up with your email and create a secure account
+              Submit corruption or community problems safely and anonymously
             </p>
           </div>
           <div className="process-step">
             <div className="step-number">2</div>
-            <h3 className="step-title">{t('submitReport')}</h3>
+            <h3 className="step-title">Authorities Review</h3>
             <p className="step-description">
-              Describe the issue, add location, and upload evidence
+              Relevant agencies receive verified reports and take action
             </p>
           </div>
           <div className="process-step">
             <div className="step-number">3</div>
-            <h3 className="step-title">{t('trackProgress')}</h3>
+            <h3 className="step-title">Track Progress</h3>
             <p className="step-description">
-              Monitor your report status from draft to resolution
-            </p>
-          </div>
-          <div className="process-step">
-            <div className="step-number">4</div>
-            <h3 className="step-title">{t('seeChange')}</h3>
-            <p className="step-description">
-              Get notified when authorities take action
+              Follow updates in real time and see the change happen
             </p>
           </div>
         </div>
@@ -544,6 +542,9 @@ const handleSignup = () => {
           </div>
         </div>
       </section>
+
+      {/* Footer - Professional Design */}
+      <Footer />
     </div>
   );
 };

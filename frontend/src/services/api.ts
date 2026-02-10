@@ -1,5 +1,6 @@
 import { Report, User } from "@/types/report";
 import {
+  API_URL,
   getAuthHeaders,
   getJsonHeaders,
   fetchGet,
@@ -10,8 +11,6 @@ import {
   fetchPostFormData,
   fetchPutFormData,
 } from "./apiHelpers";
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 
 interface ApiResponse<T> {
   status: number;
@@ -67,7 +66,7 @@ export const api = {
   ): Promise<ApiResponse<any>> => {
     return fetchPostFormData("/v1/red-flags", redFlagData, files);
   },
-    
+
   updateRedFlag: async (
     id: string,
     redFlagData: any,
@@ -102,7 +101,7 @@ export const api = {
   getInterventions: async (): Promise<ApiResponse<any>> => {
     return fetchGet("/v1/interventions");
   },
-   
+
   getIntervention: async (id: string): Promise<ApiResponse<any>> => {
     return fetchGet(`/v1/interventions/${id}`);
   },
@@ -134,7 +133,7 @@ export const api = {
     latitude: number,
     longitude: number
   ): Promise<ApiResponse<any>> => {
-    return fetchPatch(`/v1/interventions/${id}/location`, {
+    return fetchPatch(`/api/v1/interventions/${id}/location`, {
       latitude,
       longitude,
     });
@@ -148,7 +147,7 @@ export const api = {
   },
 
   deleteIntervention: async (id: string): Promise<ApiResponse<void>> => {
-    return fetchDelete(`/v1/interventions/${id}`);
+    return fetchDelete(`/api/v1/interventions/${id}`);
   },
 
   getNotifications: async (): Promise<ApiResponse<any>> => {

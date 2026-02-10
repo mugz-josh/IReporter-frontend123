@@ -1,4 +1,10 @@
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+// Determine API URL based on environment
+const isProduction = import.meta.env.PROD;
+const deployedUrl = import.meta.env.VITE_API_URL;
+
+export const API_URL = isProduction && deployedUrl
+  ? `${deployedUrl}/api`
+  : "http://localhost:3001/api";
 
 export function getAuthHeaders(): HeadersInit {
   const token = localStorage.getItem("token");
