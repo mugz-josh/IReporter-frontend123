@@ -30,6 +30,15 @@ Admins can update the status of these records, ensuring accountability and trans
 2. It has been implemnted that a  user gets a real email notification when the status of the report has been changed .
 3. The local email notification also with in the system also works .
 
+### Integration Features (NEW)
+1. **Multi-Platform Integrations**: Connect iReporter with external services (Slack, Teams, SMS, WhatsApp, REST APIs)
+2. **Automated Report Distribution**: Automatically notify external platforms when reports are created, updated, or resolved
+3. **API Key Management**: Generate and manage API keys for secure integration access
+4. **Webhook Logging**: Complete audit trail of all webhook executions
+5. **Event-Based Triggers**: Configure which report events trigger external notifications
+6. **Connection Testing**: Verify integration connectivity before enabling
+7. **Error Handling & Retry**: Automatic retry mechanism for failed webhooks
+
 ### Rules / Restrictions
 1. A user can only **change the geolocation** of a record if its status is **not yet marked** as `Under Investigation`, `Rejected`, or `Resolved`.  
 2. A user can only **edit or delete** a record if its status is **not yet marked** as `Under Investigation`, `Rejected`, or `Resolved`.  
@@ -45,6 +54,32 @@ There are three kinds of states of Reports :
 ## Project Structure
  Frontend used React of TypeScript also for backend you must also type npm run dev.
  Backend used mysql  starting it you need to  type npm run dev
+
+## Using Integrations
+
+Navigate to `/integrations` to access the Integrations Manager where you can:
+
+1. **Add New Integration**: Click "Add Integration" to create a new connection with supported services:
+   - REST API (custom webhooks)
+   - Slack
+   - Microsoft Teams
+   - SMS (Twilio)
+   - WhatsApp (Twilio)
+
+2. **Configure Events**: Select which report events should trigger the integration:
+   - Report Created
+   - Report Updated
+   - Report Resolved
+   - Comment Added
+   - Status Changed
+
+3. **Manage API Keys**: Generate secure API keys for REST API integrations with rate limiting
+
+4. **Test Connections**: Verify that your integration credentials are correct before enabling
+
+5. **View Logs**: Monitor webhook execution logs and retry failed deliveries
+
+For detailed setup instructions for each integration type, see [INTEGRATIONS_README.md](./INTEGRATIONS_README.md)
 
 
 

@@ -133,7 +133,7 @@ export const api = {
     latitude: number,
     longitude: number
   ): Promise<ApiResponse<any>> => {
-    return fetchPatch(`/api/v1/interventions/${id}/location`, {
+    return fetchPatch(`/v1/interventions/${id}/location`, { // FIXED: removed /api
       latitude,
       longitude,
     });
@@ -147,7 +147,7 @@ export const api = {
   },
 
   deleteIntervention: async (id: string): Promise<ApiResponse<void>> => {
-    return fetchDelete(`/api/v1/interventions/${id}`);
+    return fetchDelete(`/v1/interventions/${id}`); // FIXED: removed /api
   },
 
   getNotifications: async (): Promise<ApiResponse<any>> => {
