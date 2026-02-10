@@ -20,9 +20,21 @@ let db: any;
 const initializeDatabase = async () => {
   console.log("🗄️  Using PostgreSQL database");
   try {
-    const { query } = await import("./config/database");
-    db = { query };
+    const dbModule = await import("./config/database");
+    db = { query: dbModule.query };
     console.log("✅ Connected to PostgreSQL database");
+    
+    // Wait a bit to ensure tables are fully initialized
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    // Test the connection
+    try {
+      const result = await db.query("SELECT 1 as test");
+      console.log("✅ Database connection test successful");
+    } catch (testError: any) {
+      console.error("⚠️  Database connection test failed:", testError.message);
+      // Don't throw - the health check will show the issue
+    }
   } catch (err) {
     console.error("❌ Error importing PostgreSQL database:", err);
     throw err;

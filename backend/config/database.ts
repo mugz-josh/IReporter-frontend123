@@ -8,9 +8,19 @@ dotenv.config();
 // Always use PostgreSQL
 console.log('🌐 Using PostgreSQL');
 
+const databaseUrl = process.env.DATABASE_URL;
+if (!databaseUrl) {
+  console.warn('⚠️  WARNING: DATABASE_URL environment variable is not set!');
+  console.warn('❌ The application will not be able to connect to the database.');
+  console.warn('📝 Please set DATABASE_URL in your environment variables with format:');
+  console.warn('   postgresql://username:password@host:port/database');
+}
+
+console.log('🔗 Database URL configured:', databaseUrl ? 'Yes (hidden for security)' : 'No - MISSING!');
+
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL || 'postgresql://username:password@localhost:5432/ireporter',
-  ssl: process.env.DATABASE_URL && process.env.DATABASE_URL.includes('render.com') ? {
+  connectionString: databaseUrl || 'postgresql://username:password@localhost:5432/ireporter',
+  ssl: databaseUrl && databaseUrl.includes('render.com') ? {
     rejectUnauthorized: false, // Enable SSL for Render Postgres
   } : false,
   max: 10,
@@ -26,6 +36,11 @@ const initializeTables = async () => {
 
     // Read and execute the SQL file
     const sqlPath = path.join(__dirname, 'init-postgres.sql');
+    if (!fs.existsSync(sqlPath)) {
+      console.error(`❌ SQL file not found at: ${sqlPath}`);
+      throw new Error(`SQL initialization file not found at ${sqlPath}`);
+    }
+
     const sqlContent = fs.readFileSync(sqlPath, 'utf8');
     console.log('📄 SQL content length:', sqlContent.length);
 
@@ -41,8 +56,12 @@ const initializeTables = async () => {
           await pool.query(statement);
           console.log(`✅ Statement ${i + 1} executed successfully`);
         } catch (stmtError: any) {
-          console.error(`❌ Error executing statement ${i + 1}:`, stmtError);
-          // Continue with other statements
+          // Don't treat table already exists as an error
+          if (stmtError.code === '42P07' || stmtError.message?.includes('already exists')) {
+            console.log(`ℹ️  Table already exists (statement ${i + 1}), skipping...`);
+          } else {
+            console.error(`❌ Error executing statement ${i + 1}:`, stmtError.message || stmtError);
+          }
         }
       }
     }
@@ -53,6 +72,7 @@ const initializeTables = async () => {
     if (error instanceof Error) {
       console.error('Stack trace:', error.stack);
     }
+    throw error;
   }
 };
 

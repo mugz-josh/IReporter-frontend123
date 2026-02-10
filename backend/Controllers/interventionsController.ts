@@ -1,3 +1,4 @@
+
 import { Response } from "express";
 import { getDatabase } from "../config/database.local";
 import {
@@ -499,9 +500,8 @@ export const interventionsController = {
 
 
       const result = db.prepare(
-        "SELECT i.*, u.email FROM interventions i JOIN users u ON i.user_id = u.id WHERE i.id = ?",
-        [id]
-      ).get([id]) as { user_id: number; title: string; status: string; email: string } | undefined;
+        "SELECT i.*, u.email FROM interventions i JOIN users u ON i.user_id = u.id WHERE i.id = ?"
+      ).get(id) as { user_id: number; title: string; status: string; email: string } | undefined;
 
       if (!result) {
         res
