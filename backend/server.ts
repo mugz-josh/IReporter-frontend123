@@ -2,8 +2,6 @@ import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import path from "path";
-import { getDatabase } from "./config/database.local";
-
 import routes from "./routes/routes";
 // import notificationController from "./Controllers/notificationController";
 
@@ -15,11 +13,21 @@ dotenv.config();
 
 console.log("✅ Environment variables loaded");
 console.log("🌐 PORT:", process.env.PORT || 3001);
-console.log("🗄️  Using SQLite database for local development");
 
-// Initialize SQLite database
-const db = getDatabase();
-console.log("✅ Connected to SQLite database");
+// Always use PostgreSQL database
+let db: any;
+
+const initializeDatabase = async () => {
+  console.log("🗄️  Using PostgreSQL database");
+  try {
+    const { query } = await import("./config/database");
+    db = { query };
+    console.log("✅ Connected to PostgreSQL database");
+  } catch (err) {
+    console.error("❌ Error importing PostgreSQL database:", err);
+    throw err;
+  }
+};
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -43,10 +51,18 @@ console.log("🛣️  Setting up basic routes...");
 // Basic test route without loading complex routes
 app.get("/health", async (req: Request, res: Response) => {
   try {
-    // Test SQLite database connection
-    const db = getDatabase();
-    const result = db.prepare("SELECT 1 as test").get();
-    const dbStatus = "Connected to SQLite database";
+    let dbStatus = "";
+    let dbError = null;
+
+    try {
+      // Test PostgreSQL database connection
+      await db.query("SELECT 1 as test");
+      dbStatus = "Connected to PostgreSQL database";
+    } catch (pgError: any) {
+      dbStatus = "PostgreSQL connection failed";
+      dbError = pgError.message || String(pgError);
+      console.error("PostgreSQL health check error:", pgError);
+    }
 
     res.status(200).json({
       status: 200,
@@ -54,19 +70,20 @@ app.get("/health", async (req: Request, res: Response) => {
         {
           message: "iReporter API is running successfully",
           database: dbStatus,
+          error: dbError,
           timestamp: new Date().toISOString()
         }
       ],
     });
-  } catch (dbError) {
-    console.error("Database connection error:", dbError);
+  } catch (generalError: any) {
+    console.error("General health check error:", generalError);
     res.status(200).json({
       status: 200,
       data: [
         {
           message: "iReporter API is running successfully",
           database: "Database connection failed",
-          error: dbError instanceof Error ? dbError.message : String(dbError),
+          error: generalError.message || String(generalError),
           timestamp: new Date().toISOString()
         }
       ],
@@ -100,12 +117,18 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 
 console.log(`🚀 Attempting to start server on port ${PORT}...`);
 
-const server = app.listen(PORT, () => {
-  console.log(`✅ iReporter server is running on port ${PORT}`);
-  console.log(`🌍 Environment: ${process.env.NODE_ENV}`);
-  console.log(`🔗 Health check: http://localhost:${PORT}/health`);
-}).on('error', (err) => {
-  console.error('❌ Failed to start server:', err);
+// Initialize database before starting server
+initializeDatabase().then(() => {
+  const server = app.listen(PORT, () => {
+    console.log(`✅ iReporter server is running on port ${PORT}`);
+    console.log(`🌍 Environment: ${process.env.NODE_ENV}`);
+    console.log(`🔗 Health check: http://localhost:${PORT}/health`);
+  }).on('error', (err) => {
+    console.error('❌ Failed to start server:', err);
+    process.exit(1);
+  });
+}).catch((err) => {
+  console.error('❌ Failed to initialize database:', err);
   process.exit(1);
 });
 

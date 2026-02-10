@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import bcrypt from "bcryptjs";
  import jwt from "jsonwebtoken";
+import { query } from "../config/database";
 import { getDatabase } from "../config/database.local";
 import {
   AuthRequest,
@@ -14,6 +15,9 @@ import {
   sendSuccess,
   validateUserAuth,
 } from "../utils/controllerHelpers";
+
+// Always use PostgreSQL
+const db = { query };
 function formatUser(userData: any): Omit<User, "password"> {
   return {
     id: userData.id,
@@ -33,7 +37,6 @@ function generateToken(payload: object): string {
 }
 export const authController = {
   signup: async (req: Request, res: Response): Promise<void> => {
-    const db = getDatabase();
     try {
       console.log("Signup request body:", req.body);
       const { first_name, last_name, email, password, phone }: SignupData =
@@ -49,7 +52,8 @@ export const authController = {
         );
       }
 
-      const existingUsers = db.prepare("SELECT id FROM users WHERE email = ?").get([email]);
+      const queryResult = await db.query("SELECT id FROM users WHERE email = $1", [email]);
+      const existingUsers = queryResult.rows[0];
 
       if (existingUsers) {
         return sendError(res, 400, "User already exists with this email");
@@ -60,10 +64,12 @@ export const authController = {
       console.log("Password hashed successfully");
 
       console.log("Inserting new user into database...");
-      const result = db.prepare("INSERT INTO users (first_name, last_name, email, password, phone) VALUES (?, ?, ?, ?, ?)").run([first_name, last_name, email, hashedPassword, phone || null]);
+      const insertResult = await db.query("INSERT INTO users (first_name, last_name, email, password, phone) VALUES ($1, $2, $3, $4, $5) RETURNING id", [first_name, last_name, email, hashedPassword, phone || null]);
+      const result = { lastInsertRowid: insertResult.rows[0].id };
       console.log("User inserted, returned ID:", result.lastInsertRowid);
 
-      const userResults = db.prepare("SELECT id, first_name, last_name, email, phone, is_admin, created_at, updated_at FROM users WHERE id = ?").get([result.lastInsertRowid]) as Omit<User, "password"> | undefined;
+      const userSelectQuery = await db.query("SELECT id, first_name, last_name, email, phone, is_admin, created_at, updated_at FROM users WHERE id = $1", [result.lastInsertRowid]);
+      const userResults = userSelectQuery.rows[0];
 
       if (!userResults) {
         return sendError(res, 500, "Failed to retrieve user after creation");
@@ -81,7 +87,6 @@ export const authController = {
     }
   },
   login: async (req: Request, res: Response): Promise<void> => {
-    const db = getDatabase();
     try {
       const { email, password }: LoginData = req.body;
       console.log("Login attempt for email:", email);
@@ -92,7 +97,8 @@ export const authController = {
         return sendError(res, 400, "Email and password are required");
       }
 
-      const result = db.prepare("SELECT * FROM users WHERE email = ?").get([email]) as User | undefined;
+      const loginQuery = await db.query("SELECT * FROM users WHERE email = $1", [email]);
+      const result = loginQuery.rows[0];
       console.log("Query results:", result ? "found" : "not found");
 
       if (!result) {
@@ -126,7 +132,6 @@ export const authController = {
     }
   },
   getProfile: async (req: AuthRequest, res: Response): Promise<void> => {
-    const db = getDatabase();
     try {
       const userId = req.user?.id;
       const authCheck = validateUserAuth(userId);
@@ -138,7 +143,8 @@ export const authController = {
         );
       }
 
-      const results = db.prepare("SELECT id, first_name, last_name, email, phone, is_admin, profile_picture, created_at, updated_at FROM users WHERE id = ?").get([userId]);
+      const queryResult = await db.query("SELECT id, first_name, last_name, email, phone, is_admin, profile_picture, created_at, updated_at FROM users WHERE id = $1", [userId]);
+      const results = queryResult.rows[0];
 
       if (!results) {
         return sendError(res, 404, "User not found");
@@ -151,7 +157,6 @@ export const authController = {
     }
   },
   updateProfile: async (req: AuthRequest, res: Response): Promise<void> => {
-    const db = getDatabase();
     try {
       const userId = req.user?.id;
       const {
@@ -184,7 +189,8 @@ export const authController = {
         );
       }
       if (email) {
-        const existingUsers = db.prepare("SELECT id FROM users WHERE email = ? AND id != ?").get([email, userId]);
+        const queryResult = await db.query("SELECT id FROM users WHERE email = $1 AND id != $2", [email, userId]);
+        const existingUsers = queryResult.rows[0];
         if (existingUsers) {
           return sendError(res, 400, "Email is already in use by another user");
         }
@@ -194,31 +200,32 @@ export const authController = {
       const values: any[] = [];
 
       if (first_name) {
-        updates.push(`first_name = ?`);
+        updates.push(`first_name = $${updates.length + 1}`);
         values.push(first_name);
       }
       if (last_name) {
-        updates.push(`last_name = ?`);
+        updates.push(`last_name = $${updates.length + 1}`);
         values.push(last_name);
       }
       if (email) {
-        updates.push(`email = ?`);
+        updates.push(`email = $${updates.length + 1}`);
         values.push(email);
       }
       if (phone !== undefined) {
-        updates.push(`phone = ?`);
+        updates.push(`phone = $${updates.length + 1}`);
         values.push(phone || null);
       }
 
-      updates.push("updated_at = datetime('now')");
+      updates.push("updated_at = CURRENT_TIMESTAMP");
       values.push(userId);
 
-      const updateQuery = `UPDATE users SET ${updates.join(", ")} WHERE id = ?`;
+      const updateQuery = `UPDATE users SET ${updates.join(", ")} WHERE id = $${values.length}`;
 
-      db.prepare(updateQuery).run(values);
+      await db.query(updateQuery, values);
 
 
-      const results = db.prepare("SELECT id, first_name, last_name, email, phone, is_admin, profile_picture, created_at, updated_at FROM users WHERE id = ?").get([userId]) as Omit<User, "password"> | undefined;
+      const profileQueryResult = await db.query("SELECT id, first_name, last_name, email, phone, is_admin, profile_picture, created_at, updated_at FROM users WHERE id = $1", [userId]);
+      const results = profileQueryResult.rows[0];
 
       if (!results) {
         return sendError(res, 404, "User not found after update");
@@ -232,7 +239,6 @@ export const authController = {
   },
 
   uploadProfilePicture: async (req: AuthRequest, res: Response): Promise<void> => {
-    const db = getDatabase();
     try {
       const userId = req.user?.id;
       if (!userId) {
@@ -245,7 +251,7 @@ export const authController = {
 
       const filePath = `/uploads/${req.file.filename}`;
 
-      db.prepare("UPDATE users SET profile_picture = ?, updated_at = datetime('now') WHERE id = ?").run([filePath, userId]);
+      await db.query("UPDATE users SET profile_picture = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2", [filePath, userId]);
 
       sendSuccess(res, 200, [{ profile_picture: filePath }]);
     } catch (error) {
@@ -254,7 +260,6 @@ export const authController = {
   },
 
   getUsers: async (req: AuthRequest, res: Response): Promise<void> => {
-    const db = getDatabase();
     try {
       const userId = req.user?.id;
 
@@ -267,15 +272,16 @@ export const authController = {
         );
       }
 
-      const userResults = db.prepare("SELECT is_admin FROM users WHERE id = ?").get([userId]) as { is_admin: boolean } | undefined;
+      const userResults = await db.query("SELECT is_admin FROM users WHERE id = $1", [userId]);
+      const userRow = userResults.rows[0];
 
-      if (!userResults || !userResults.is_admin) {
+      if (!userRow || !userRow.is_admin) {
         return sendError(res, 403, "Admin access required");
       }
 
-    const results = db.prepare("SELECT id, first_name, last_name, email, phone, is_admin, profile_picture, created_at, updated_at FROM users ORDER BY created_at DESC").all();
+    const results = await db.query("SELECT id, first_name, last_name, email, phone, is_admin, profile_picture, created_at, updated_at FROM users ORDER BY created_at DESC");
 
-   const users = results.map(formatUser);
+   const users = results.rows.map(formatUser);
       sendSuccess(res, 200, users);
     } catch (error) {
       sendError(res, 500, "Server error while fetching users", error);

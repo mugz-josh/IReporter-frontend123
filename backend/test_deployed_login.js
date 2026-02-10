@@ -1,22 +1,19 @@
-const http = require('http');
+const https = require('https');
 
-async function testSignup() {
-  const signupData = {
-    first_name: "Davis",
-    last_name: "Kwezi",
-    email: "daviskwezirahisham5645@gmail.com",
-    password: "Kweziramyf",
-    phone: "1234567890"
+async function testDeployedLogin() {
+  const loginData = {
+    email: "Mollyadmin@ireporter.com", // Use the admin user that should exist
+    password: "password"
   };
 
-  console.log('Testing signup with data:', signupData);
+  console.log('Testing deployed login with data:', loginData);
 
-  const postData = JSON.stringify(signupData);
+  const postData = JSON.stringify(loginData);
 
   const options = {
-    hostname: 'localhost',
-    port: 3001,
-    path: '/api/v1/auth/signup',
+    hostname: 'ireporter-frontend123.onrender.com',
+    port: 443,
+    path: '/api/v1/auth/login',
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -24,7 +21,7 @@ async function testSignup() {
     }
   };
 
-  const req = http.request(options, (res) => {
+  const req = https.request(options, (res) => {
     console.log('Response status:', res.statusCode);
     console.log('Response headers:', res.headers);
 
@@ -51,4 +48,4 @@ async function testSignup() {
   req.end();
 }
 
-testSignup();
+testDeployedLogin();
