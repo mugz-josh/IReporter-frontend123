@@ -213,23 +213,31 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-sm w-full space-y-6" style={{ maxWidth: '380px' }}>
-        {/* Header */}
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center py-8 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      {/* Background decorative elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-purple-500/20 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-indigo-400/20 to-cyan-500/20 rounded-full blur-3xl"></div>
+      </div>
+
+      <div className="max-w-md w-full space-y-8 relative z-10" style={{ maxWidth: '420px' }}>
+        {/* Enhanced Header */}
         <div className="text-center">
-          <div className="mx-auto h-10 w-10 bg-blue-600 rounded-full flex items-center justify-center mb-3">
-            <Flag className="h-5 w-5 text-white" />
+          <div className="mx-auto h-16 w-16 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-blue-500/25 transform hover:scale-105 transition-transform duration-300">
+            <Flag className="h-8 w-8 text-white" />
           </div>
-          <h2 className="text-2xl font-extrabold text-gray-900 mb-1">
+          <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-3">
             Welcome to iReporter
           </h2>
-          <p className="text-gray-600 text-xs">
+          <p className="text-gray-600 text-sm font-medium leading-relaxed">
             Report corruption and interventions anonymously
           </p>
         </div>
 
-        {/* Auth Container */}
-        <div className="bg-white py-6 px-5 shadow-lg rounded-lg border border-gray-200">
+        {/* Enhanced Auth Container */}
+        <div className="bg-white/80 backdrop-blur-xl py-8 px-6 shadow-2xl shadow-gray-900/10 rounded-2xl border border-white/20 relative overflow-hidden">
+          {/* Subtle inner glow */}
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-indigo-50/50 rounded-2xl"></div>
           {/* Tab Navigation */}
           <div className="flex mb-6 bg-gray-100 rounded-lg p-1">
             <button
@@ -255,10 +263,10 @@ export default function Auth() {
           </div>
 
           {showLogin ? (
-            <div>
-              <div className="mb-5">
-                <h3 className="text-lg font-semibold text-gray-900 mb-1">Sign in to your account</h3>
-                <p className="text-gray-600 text-xs">Enter your credentials to access your account</p>
+            <div className="relative z-10">
+              <div className="mb-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Sign in to your account</h3>
+                <p className="text-gray-600 text-sm">Enter your credentials to access your account</p>
               </div>
 
               <form className="space-y-4" onSubmit={handleLogin}>
@@ -370,10 +378,10 @@ export default function Auth() {
               </form>
             </div>
           ) : (
-            <div>
-              <div className="mb-5">
-                <h3 className="text-lg font-semibold text-gray-900 mb-1">Create your account</h3>
-                <p className="text-gray-600 text-xs">Join iReporter to start making a difference</p>
+            <div className="relative z-10">
+              <div className="mb-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Create your account</h3>
+                <p className="text-gray-600 text-sm">Join iReporter to start making a difference</p>
               </div>
 
               <form className="space-y-4" onSubmit={handleSignup}>
@@ -495,15 +503,15 @@ export default function Auth() {
           )}
         </div>
 
-        {/* Footer */}
-        <div className="text-center">
-          <p className="text-xs text-gray-600">
+        {/* Enhanced Footer */}
+        <div className="text-center relative z-10">
+          <p className="text-sm text-gray-600 leading-relaxed">
             By signing in, you agree to our{' '}
-            <button className="font-medium text-blue-600 hover:text-blue-500 transition-colors duration-200">
+            <button className="font-semibold text-blue-600 hover:text-indigo-700 transition-colors duration-200 hover:underline">
               Terms of Service
             </button>{' '}
             and{' '}
-            <button className="font-medium text-blue-600 hover:text-blue-500 transition-colors duration-200">
+            <button className="font-semibold text-blue-600 hover:text-indigo-700 transition-colors duration-200 hover:underline">
               Privacy Policy
             </button>
           </p>

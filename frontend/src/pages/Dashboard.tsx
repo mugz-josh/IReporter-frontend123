@@ -340,63 +340,206 @@ export default function Dashboard() {
 
   return (
     <div className="page-dashboard">
-      {/* Welcome Animation */}
+      {/* Enhanced Welcome Animation */}
       <div className="welcome-animation" style={{
         position: 'fixed',
         top: 0,
         left: 0,
         right: 0,
         bottom: 0,
-        background: 'hsl(var(--background))',
+        background: 'linear-gradient(135deg, hsl(var(--background)) 0%, hsl(var(--card)) 50%, hsl(var(--background)) 100%)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         zIndex: 9999,
-        animation: 'fadeOut 2s ease-in-out 1s forwards'
+        animation: 'welcomeFadeOut 3s ease-in-out 2s forwards',
+        backdropFilter: 'blur(10px)'
       }}>
+        {/* Animated background particles */}
+        <div className="welcome-particles" style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          overflow: 'hidden',
+          pointerEvents: 'none'
+        }}>
+          {[...Array(20)].map((_, i) => (
+            <div
+              key={i}
+              style={{
+                position: 'absolute',
+                width: '4px',
+                height: '4px',
+                background: `hsl(${Math.random() * 360}, 70%, 60%)`,
+                borderRadius: '50%',
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animation: `particleFloat ${2 + Math.random() * 2}s ease-in-out infinite`,
+                animationDelay: `${Math.random() * 2}s`,
+                opacity: 0.6
+              }}
+            />
+          ))}
+        </div>
+
         <div style={{
           textAlign: 'center',
-          animation: 'slideIn 0.8s ease-out'
+          animation: 'welcomeSlideIn 1s cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+          position: 'relative',
+          zIndex: 1
         }}>
+          {/* Enhanced success icon with glow */}
           <div style={{
-            width: '80px',
-            height: '80px',
-            margin: '0 auto 1rem',
+            width: '120px',
+            height: '120px',
+            margin: '0 auto 2rem',
             borderRadius: '50%',
-            background: 'linear-gradient(135deg, hsl(var(--primary)), hsl(var(--destructive)))',
+            background: 'linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--destructive)) 50%, hsl(var(--primary)) 100%)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             color: 'white',
-            fontSize: '2rem',
-            fontWeight: 'bold'
+            fontSize: '3rem',
+            fontWeight: 'bold',
+            boxShadow: '0 0 40px hsl(var(--primary) / 0.5), 0 0 80px hsl(var(--primary) / 0.3), inset 0 2px 10px rgba(255,255,255,0.2)',
+            animation: 'iconPulse 2s ease-in-out infinite, iconBounce 0.6s ease-out',
+            position: 'relative'
           }}>
-            ✓
+            <span style={{
+              animation: 'checkmarkDraw 0.8s ease-out 0.3s both'
+            }}>✓</span>
+            {/* Decorative rings */}
+            <div style={{
+              position: 'absolute',
+              top: '-10px',
+              left: '-10px',
+              right: '-10px',
+              bottom: '-10px',
+              border: '2px solid hsl(var(--primary) / 0.3)',
+              borderRadius: '50%',
+              animation: 'ringExpand 1.5s ease-out infinite'
+            }} />
+            <div style={{
+              position: 'absolute',
+              top: '-20px',
+              left: '-20px',
+              right: '-20px',
+              bottom: '-20px',
+              border: '1px solid hsl(var(--primary) / 0.2)',
+              borderRadius: '50%',
+              animation: 'ringExpand 1.5s ease-out 0.5s infinite'
+            }} />
           </div>
+
+          {/* Enhanced welcome text */}
           <h2 style={{
             color: 'hsl(var(--foreground))',
-            fontSize: '1.5rem',
-            marginBottom: '0.5rem'
+            fontSize: '2.5rem',
+            fontWeight: '800',
+            marginBottom: '1rem',
+            background: 'linear-gradient(135deg, hsl(var(--foreground)) 0%, hsl(var(--primary)) 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            textShadow: '0 2px 10px rgba(0,0,0,0.1)',
+            animation: 'textGlow 2s ease-in-out infinite alternate',
+            letterSpacing: '-0.02em'
           }}>
             Welcome back, {currentUser?.first_name}!
           </h2>
+
           <p style={{
             color: 'hsl(var(--muted-foreground))',
-            fontSize: '1rem'
+            fontSize: '1.25rem',
+            fontWeight: '500',
+            marginBottom: '2rem',
+            animation: 'textFadeIn 1s ease-out 0.5s both',
+            maxWidth: '400px',
+            margin: '0 auto 2rem',
+            lineHeight: '1.6'
           }}>
             Ready to make a difference today?
           </p>
+
+          {/* Progress indicator */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: '0.5rem',
+            marginTop: '1rem'
+          }}>
+            {[...Array(3)].map((_, i) => (
+              <div
+                key={i}
+                style={{
+                  width: '8px',
+                  height: '8px',
+                  borderRadius: '50%',
+                  background: 'hsl(var(--primary))',
+                  animation: `progressDot 1.5s ease-in-out infinite`,
+                  animationDelay: `${i * 0.2}s`
+                }}
+              />
+            ))}
+          </div>
         </div>
       </div>
 
-      <style >{`
-        @keyframes fadeOut {
-          0% { opacity: 1; }
-          100% { opacity: 0; visibility: hidden; }
+      <style>{`
+        @keyframes welcomeFadeOut {
+          0% { opacity: 1; transform: scale(1); }
+          90% { opacity: 1; transform: scale(1); }
+          100% { opacity: 0; transform: scale(1.05); visibility: hidden; }
         }
-        @keyframes slideIn {
-          0% { transform: translateY(20px); opacity: 0; }
-          100% { transform: translateY(0); opacity: 1; }
+
+        @keyframes welcomeSlideIn {
+          0% { transform: translateY(50px) scale(0.8); opacity: 0; }
+          50% { transform: translateY(-10px) scale(1.05); opacity: 0.8; }
+          100% { transform: translateY(0) scale(1); opacity: 1; }
+        }
+
+        @keyframes iconPulse {
+          0%, 100% { transform: scale(1); box-shadow: 0 0 40px hsl(var(--primary) / 0.5), 0 0 80px hsl(var(--primary) / 0.3); }
+          50% { transform: scale(1.1); box-shadow: 0 0 60px hsl(var(--primary) / 0.7), 0 0 120px hsl(var(--primary) / 0.5); }
+        }
+
+        @keyframes iconBounce {
+          0% { transform: translateY(0); }
+          50% { transform: translateY(-10px); }
+          100% { transform: translateY(0); }
+        }
+
+        @keyframes checkmarkDraw {
+          0% { transform: scale(0) rotate(-180deg); opacity: 0; }
+          50% { transform: scale(1.2) rotate(-90deg); opacity: 0.7; }
+          100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+
+        @keyframes ringExpand {
+          0% { transform: scale(1); opacity: 0.8; }
+          100% { transform: scale(1.5); opacity: 0; }
+        }
+
+        @keyframes particleFloat {
+          0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.6; }
+          50% { transform: translateY(-20px) rotate(180deg); opacity: 0.3; }
+        }
+
+        @keyframes textGlow {
+          0% { filter: drop-shadow(0 0 5px hsl(var(--primary) / 0.3)); }
+          100% { filter: drop-shadow(0 0 15px hsl(var(--primary) / 0.6)); }
+        }
+
+        @keyframes textFadeIn {
+          0% { opacity: 0; transform: translateY(20px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes progressDot {
+          0%, 80%, 100% { transform: scale(1); opacity: 0.5; }
+          40% { transform: scale(1.5); opacity: 1; }
         }
       `}</style>
 
