@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Search, Filter, X, Calendar, MapPin, Tag } from 'lucide-react';
+import { Search, Filter, X, Calendar, MapPin, Tag, TrendingUp, Clock, CheckCircle, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
 interface AdvancedSearchProps {
   onSearch: (filters: SearchFilters) => void;
   onClose: () => void;
+  initialFilters?: Partial<SearchFilters>;
 }
 
 export interface SearchFilters {
@@ -15,17 +16,34 @@ export interface SearchFilters {
   dateTo: string;
   location: string;
   type: string;
+  sortBy: string;
+  sortOrder: 'asc' | 'desc';
+  hasImages: boolean;
+  hasComments: boolean;
+  minUpvotes: number;
 }
 
-export const AdvancedSearch: React.FC<AdvancedSearchProps> = ({ onSearch, onClose }) => {
+export const AdvancedSearch: React.FC<AdvancedSearchProps> = ({
+  onSearch,
+  onClose,
+  initialFilters = {}
+}) => {
   const [filters, setFilters] = useState<SearchFilters>({
     query: '',
     status: '',
     dateFrom: '',
     dateTo: '',
     location: '',
-    type: ''
+    type: '',
+    sortBy: 'created_at',
+    sortOrder: 'desc',
+    hasImages: false,
+    hasComments: false,
+    minUpvotes: 0,
+    ...initialFilters
   });
+
+  const [activeFilters, setActiveFilters] = useState<string[]>([]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,8 +57,31 @@ export const AdvancedSearch: React.FC<AdvancedSearchProps> = ({ onSearch, onClos
       dateFrom: '',
       dateTo: '',
       location: '',
-      type: ''
+      type: '',
+      sortBy: 'created_at',
+      sortOrder: 'desc',
+      hasImages: false,
+      hasComments: false,
+      minUpvotes: 0
     });
+    setActiveFilters([]);
+  };
+
+  const updateFilter = (key: keyof SearchFilters, value: any) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+
+    // Track active filters for display
+    if (value && value !== '' && value !== false && value !== 0) {
+      if (!activeFilters.includes(key)) {
+        setActiveFilters(prev => [...prev, key]);
+      }
+    } else {
+      setActiveFilters(prev => prev.filter(f => f !== key));
+    }
+  };
+
+  const removeFilter = (key: keyof SearchFilters) => {
+    updateFilter(key, key === 'minUpvotes' ? 0 : key === 'hasImages' || key === 'hasComments' ? false : '');
   };
 
   return (

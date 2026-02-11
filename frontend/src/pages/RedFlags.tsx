@@ -70,7 +70,12 @@ export default function RedFlags() {
     dateFrom: '',
     dateTo: '',
     location: '',
-    type: ''
+    type: '',
+    sortBy: 'newest',
+    sortOrder: 'desc',
+    hasImages: false,
+    hasComments: false,
+    minUpvotes: 0
   });
 
 
@@ -710,6 +715,10 @@ export default function RedFlags() {
 
                   {/* Actions Section */}
                   <div className="flex gap-2 pt-4 pb-2 px-2 border-t border-border bg-muted/30 rounded-b-lg">
+                    <UpvoteButton
+                      reportType="red_flag"
+                      reportId={report.id}
+                    />
                     <Button
                       size="sm"
                       variant="outline"
@@ -725,21 +734,21 @@ export default function RedFlags() {
                     <Button
                       size="sm"
                       variant="outline"
+                      onClick={() => setShareReport({ id: report.id, type: 'red-flag', title: report.title })}
+                      className="flex-1 text-xs px-3 py-2 h-9"
+                    >
+                      <Share2 size={14} className="mr-1" />
+                      Share
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
                       onClick={() => handleEdit(report.id, report.status)}
                       disabled={report.status !== "DRAFT"}
                       className="flex-1 text-xs px-3 py-2 h-9"
                     >
                       <Edit size={14} className="mr-1" />
                       Edit
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setShareReport({ id: report.id, type: 'red-flag', title: report.title })}
-                      className="flex-1 text-xs px-3 py-2 h-9"
-                    >
-                      <Share2 size={14} className="mr-1" />
-                      Share
                     </Button>
                     <Button
                       size="sm"

@@ -22,6 +22,7 @@ import Sidebar from  "@/components/Sidebar";
 import { getGreeting } from "@/utils/greetingUtils";
 import { ShareReport } from "@/components/ShareReport";
 import { CommentsSection } from "@/components/CommentsSection";
+import { UpvoteButton } from "@/components/UpvoteButton";
 
 
 export default function Interventions() {
@@ -356,69 +357,61 @@ export default function Interventions() {
         ) : (
           <div className="cards-grid">
             {reports.map((report) => (
-              <div key={report.id} className="record-card">
+              <div key={report.id} className="record-card hover:shadow-lg transition-all duration-300 group">
                 <div className="record-body">
-                  <span className="record-badge badge-secondary">
-                    Intervention
-                  </span>
-
-                  <h4 className="text-lg font-semibold mb-2">{report.title}</h4>
-
-                  <div className="space-y-2 text-sm muted-foreground mb-4">
-                    <p>
-                      <strong>Report ID:</strong> {report.id}
-                    </p>
-                    <p>
-                      <strong>Description:</strong>
-                    </p>
-                    <p>{report.description}</p>
-                    <p>
-                      <strong>Status:</strong>
-                    </p>
-                    <p
-                      className={
-                        report.status === "RESOLVED"
-                          ? "status-resolved"
-                          : "status-other"
-                      }
-                    >
-                      {report.status}
-                    </p>
-                    <p>
-                      <strong>Location:</strong>
-                    </p>
-                    <p>
-                      Lat: {report.latitude.toFixed(6)}, Lon:{" "}
-                      {report.longitude.toFixed(6)}
-                    </p>
-                    <p className="text-xs">
-                      Created: {new Date(report.createdAt).toLocaleDateString()}
-                    </p>
+                  {/* Header Section */}
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <Plus className="w-5 h-5 text-blue-500" />
+                      <span className="record-badge badge-secondary">Intervention</span>
+                    </div>
+                    <div className={`px-3 py-1 rounded-full text-xs font-medium ${
+                      report.status === "RESOLVED" ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" :
+                      report.status === "UNDER INVESTIGATION" ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200" :
+                      report.status === "REJECTED" ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200" :
+                      "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200"
+                    }`}>
+                      {report.status === "UNDER INVESTIGATION" ? "Under Review" : report.status}
+                    </div>
                   </div>
 
-                  {(report as any).images &&
-                    (report as any).images.length > 0 && (
-                      <div className="space-y-2 mb-4">
-                        {(report as any).images.map(
-                          (img: string, idx: number) => (
-                            <img
-                              key={idx}
-                              src={`${FILE_BASE}/uploads/${img}`}
-                              alt={`${report.title} ${idx + 1}`}
-                              className="record-image"
-                            />
-                          )
+                  {/* Title */}
+                  <h4 className="text-lg font-semibold mb-3 text-foreground group-hover:text-primary transition-colors">
+                    {report.title}
+                  </h4>
+
+                  {/* Content Section */}
+                  <div className="space-y-3 mb-4">
+                    <div className="bg-muted/50 rounded-lg p-3">
+                      <p className="text-sm text-muted-foreground mb-1"><strong>Report ID:</strong> {report.id}</p>
+                      <p className="text-sm text-muted-foreground mb-2"><strong>Description:</strong></p>
+                      <p className="text-sm text-foreground line-clamp-2">{report.description}</p>
+                    </div>
+
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <span>📍 Lat: {report.latitude.toFixed(4)}, Lon: {report.longitude.toFixed(4)}</span>
+                      <span>📅 {new Date(report.createdAt).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+
+                  {/* Media Section */}
+                  {(report as any).images && (report as any).images.length > 0 && (
+                    <div className="mb-4">
+                      <div className="grid grid-cols-2 gap-2">
+                        {(report as any).images.slice(0, 2).map((img: string, idx: number) => (
+                          <img
+                            key={idx}
+                            src={`${FILE_BASE}/uploads/${img}`}
+                            alt={`${report.title} ${idx + 1}`}
+                            className="record-image rounded-lg border border-border"
+                          />
+                        ))}
+                        {(report as any).images.length > 2 && (
+                          <div className="bg-muted rounded-lg flex items-center justify-center text-sm text-muted-foreground">
+                            +{(report as any).images.length - 2} more
+                          </div>
                         )}
                       </div>
-                    )}
-
-                  {report.videos && report.videos.length > 0 && (
-                    <div className="space-y-2 mb-4">
-                      {report.videos.map((vid: string, idx: number) => (
-                        <video key={idx} controls className="record-image">
-                          <source src={`${FILE_BASE}/uploads/${vid}`} />
-                        </video>
-                      ))}
                     </div>
                   )}
 
@@ -532,6 +525,38 @@ export default function Interventions() {
             isOpen={!!shareReport}
             onClose={() => setShareReport(null)}
           />
+        )}
+
+        {/* Comments Modal */}
+        {showComments && selectedReport && (
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+            onClick={() => setShowComments(false)}
+          >
+            <div
+              className="bg-card rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="p-6 border-b border-border">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold">Comments for "{selectedReport.title}"</h3>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowComments(false)}
+                  >
+                    ✕
+                  </Button>
+                </div>
+              </div>
+              <div className="p-6 overflow-y-auto max-h-[60vh]">
+                <CommentsSection
+                  reportType="intervention"
+                  reportId={selectedReport.id}
+                />
+              </div>
+            </div>
+          </div>
         )}
       </main>
     </div>

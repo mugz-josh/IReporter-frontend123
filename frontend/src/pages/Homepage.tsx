@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import "../components/ui/styles/components.css";
 import { Footer } from "@/components/Footer";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { ThemeSelector } from "@/components/ThemeSelector";
 import LanguageSelector from "@/components/LanguageSelector";
 import {
   Shield,
@@ -32,12 +32,30 @@ import {
   Twitter,
   Instagram,
   Linkedin,
+  Share2,
 } from "lucide-react";
 
 const Homepage: React.FC = () => {
- const navigate = useNavigate();
- const { t } = useTranslation();
- const [isSpeaking, setIsSpeaking] = useState(false);
+  const navigate = useNavigate();
+  const { t } = useTranslation();
+  const [isSpeaking, setIsSpeaking] = useState(false);
+
+  const shareStory = (title: string, description: string) => {
+   const url = window.location.href;
+   const text = `${title}\n\n${description}\n\nShared from iReporter - Making a difference in communities!`;
+
+   if (navigator.share) {
+     navigator.share({
+       title: title,
+       text: text,
+       url: url,
+     });
+   } else {
+     // Fallback for browsers that don't support Web Share API
+     const shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+     window.open(shareUrl, '_blank');
+   }
+ };
 
  const speakIntro = () => {
    if ('speechSynthesis' in window) {
@@ -90,7 +108,7 @@ const handleSignup = () => {
             </a>
           </nav>
           <div className="header-actions">
-            <ThemeToggle />
+            <ThemeSelector />
             <LanguageSelector />
             <button
               className="btn-ghost"
@@ -374,6 +392,16 @@ const handleSignup = () => {
                   <div className="success-story-stat-number">45</div>
                   <div className="success-story-stat-label">Days to Resolution</div>
                 </div>
+              </div>
+              <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem' }}>
+                <button
+                  className="btn btn-ghost"
+                  onClick={() => shareStory('Corruption in Local Government', 'A citizen reported embezzlement of public funds by local officials. The report led to a full investigation, recovery of stolen funds, and prosecution of those involved.')}
+                  style={{ fontSize: '0.875rem', padding: '0.5rem 1rem' }}
+                >
+                  <Share2 size={16} style={{ marginRight: '0.5rem' }} />
+                  Share
+                </button>
               </div>
             </div>
 
