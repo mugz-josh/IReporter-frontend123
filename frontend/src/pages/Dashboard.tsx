@@ -1333,7 +1333,7 @@ export default function Dashboard() {
                   onChange={(e) => setStatusFilter(e.target.value)}
                   style={{
                     padding: "0.5rem 1rem",
-                    border: "1px soli for real and for sure pleaser(--border))",
+                    border: "1px solid hsl(var(--border))",
                     borderRadius: "0.375rem",
                     background: "hsl(var(--background))",
                     color: "hsl(var(--foreground))",

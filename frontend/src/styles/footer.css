@@ -15,16 +15,18 @@
 /* ==================== FOOTER MAIN CONTENT ==================== */
 
 .footer-main {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 0 1.5rem 3rem 1.5rem;
+  padding: 4rem 0 3rem;
+  position: relative;
+  z-index: 2;
 }
 
 .footer-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2rem;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 2.5rem;
-  margin-bottom: 3rem;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1.5fr;
+  gap: 3rem;
 }
 
 /* ==================== FOOTER SECTION ==================== */

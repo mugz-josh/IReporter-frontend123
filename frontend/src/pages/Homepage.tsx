@@ -99,7 +99,7 @@ const handleSignup = () => {
               {t('login')}
             </button>
             <button className="btn-primary" onClick={handleSignup}>
-              {t('getStarted')}
+              {t('GetStarted')}
             </button>
           </div>
         </div>
@@ -136,7 +136,7 @@ const handleSignup = () => {
               className="btn-secondary btn-lg"
               onClick={() =>
                 document
-                  .getElementById("how-it-works")
+                  .getElementById("How-it-works")
                   ?.scrollIntoView({ behavior: "smooth" })
               }
             >
