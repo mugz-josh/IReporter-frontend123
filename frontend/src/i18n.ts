@@ -5,7 +5,7 @@ import LanguageDetector from "i18next-browser-languagedetector";
 const resources = {
   en: {
     translation: {
-      "hero.title": "Empower Your Voice, Drive Change in Your Community",
+      "hero.title": "Promoting Transparency, Combating Corruption, Empowering Communities",
       "hero.description":
         "Report corruption and any other issues that would require government intervention directly to the authorities. Join thousands of citizens making Africa more transparent and accountable.",
       "nav.features": "Features",
