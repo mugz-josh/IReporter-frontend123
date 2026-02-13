@@ -33,12 +33,15 @@ import {
   Instagram,
   Linkedin,
   Share2,
+  Menu,
+  X,
 } from "lucide-react";
 
 const Homepage: React.FC = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const shareStory = (title: string, description: string) => {
    const url = window.location.href;
@@ -134,11 +137,16 @@ const handleSignup = () => {
           backgroundRepeat: "no-repeat",
         }}
       >
-        <div className="hero-overlay" style={{ background: 'linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4))' }} />
+        <div className="hero-overlay" style={{ background: 'linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6))' }} />
         <div className="hero-content">
           <div className="hero-badge">
             <Star size={16} />
             Trusted by 10,000+ Citizens across Africa
+          </div>
+          <div className="hero-trust-signals">
+            <span>✔ End-to-end encrypted & anonymous</span>
+            <span>✔ Used in multiple African countries</span>
+            <span>✔ Reports reviewed by verified authorities</span>
           </div>
           <h1 className="hero-title">
             {t('hero.title')}
@@ -154,32 +162,19 @@ const handleSignup = () => {
               className="btn-secondary btn-lg"
               onClick={() =>
                 document
-                  .getElementById("How-it-works")
+                  .getElementById("how-it-works")
                   ?.scrollIntoView({ behavior: "smooth" })
               }
             >
-              Learn How It Works
+              How It Works
             </button>
             <button
-              className="btn-outline btn-lg"
+              className="btn-ghost btn-lg"
               onClick={speakIntro}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                background: 'transparent',
-                border: '2px solid hsl(var(--primary))',
-                color: 'hsl(var(--primary))',
-                padding: '0.75rem 1.5rem',
-                borderRadius: '0.5rem',
-                cursor: 'pointer',
-                fontSize: '1rem',
-                fontWeight: '500',
-                transition: 'all 0.2s ease'
-              }}
+              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
             >
               {isSpeaking ? <VolumeX size={20} /> : <Volume2 size={20} />}
-              {isSpeaking ? 'Stop Audio' : 'Listen to Intro'}
+              {isSpeaking ? 'Stop Audio' : 'Listen'}
             </button>
           </div>
           <div className="hero-features">
@@ -197,9 +192,41 @@ const handleSignup = () => {
             </div>
           </div>
         </div>
+        <div className="scroll-cue">
+          <span>↓ See How iReporter Works</span>
+        </div>
       </section>
 
-      
+      <section id="how-it-works" className="process-section">
+        <h2 className="section-title">How It Works</h2>
+        <p className="section-subtitle">
+          From report to resolution in three simple steps
+        </p>
+        <div className="process-steps">
+          <div className="process-step">
+            <div className="step-number">1</div>
+            <h3 className="step-title">Report an Issue</h3>
+            <p className="step-description">
+              Submit corruption or community problems safely and anonymously
+            </p>
+          </div>
+          <div className="process-step">
+            <div className="step-number">2</div>
+            <h3 className="step-title">Authorities Review</h3>
+            <p className="step-description">
+              Relevant agencies receive verified reports and take action
+            </p>
+          </div>
+          <div className="process-step">
+            <div className="step-number">3</div>
+            <h3 className="step-title">Track Progress</h3>
+            <p className="step-description">
+              Follow updates in real time and see the change happen
+            </p>
+          </div>
+        </div>
+      </section>
+
       <section id="impact" className="stats-section">
         <h2 className="section-title">{t('trustedBy')}</h2>
         <p className="section-subtitle">

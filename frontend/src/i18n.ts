@@ -7,7 +7,7 @@ const resources = {
     translation: {
       "hero.title": "Promoting Transparency, Combating Corruption, Empowering Communities",
       "hero.description":
-        "Report corruption and any other issues that would require government intervention directly to the authorities. Join thousands of citizens making Africa more transparent and accountable.",
+        "Report corruption and public service failures securely and anonymously. Track progress in real time and help build a transparent, accountable Africa.",
       "nav.features": "Features",
       "nav.howItWorks": "How It Works",
       "nav.impact": "Impact",

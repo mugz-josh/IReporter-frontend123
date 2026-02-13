@@ -18,7 +18,27 @@ import {
   Heart,
   Share2,
   Filter,
+  BarChart3,
+  PieChart,
+  LineChart,
+  Activity,
 } from "lucide-react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart as RechartsPieChart,
+  Pie,
+  Cell,
+  LineChart as RechartsLineChart,
+  Line,
+  Area,
+  AreaChart,
+} from "recharts";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -77,6 +97,10 @@ export default function RedFlags() {
     hasComments: false,
     minUpvotes: 0
   });
+  const [chartData, setChartData] = useState<any[]>([]);
+  const [pieData, setPieData] = useState<any[]>([]);
+  const [lineData, setLineData] = useState<any[]>([]);
+  const [showCharts, setShowCharts] = useState(false);
 
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
@@ -88,7 +112,8 @@ export default function RedFlags() {
       return;
     }
     loadReports();
-  }, [currentUser]);
+    generateChartData();
+  }, [currentUser, reports]);
 
   const loadReports = async () => {
     try {
@@ -321,6 +346,45 @@ export default function RedFlags() {
         variant: "destructive",
       });
     }
+  };
+
+  const generateChartData = () => {
+    // Bar chart data for status distribution
+    const statusData = [
+      { name: 'Resolved', value: stats.resolved, color: '#10b981' },
+      { name: 'Unresolved', value: stats.unresolved, color: '#f59e0b' },
+      { name: 'Rejected', value: stats.rejected, color: '#ef4444' },
+    ];
+    setChartData(statusData);
+
+    // Pie chart data for status percentages
+    const total = stats.resolved + stats.unresolved + stats.rejected;
+    const pieChartData = [
+      { name: 'Resolved', value: stats.resolved, percentage: total > 0 ? ((stats.resolved / total) * 100).toFixed(1) : 0, color: '#10b981' },
+      { name: 'Unresolved', value: stats.unresolved, percentage: total > 0 ? ((stats.unresolved / total) * 100).toFixed(1) : 0, color: '#f59e0b' },
+      { name: 'Rejected', value: stats.rejected, percentage: total > 0 ? ((stats.rejected / total) * 100).toFixed(1) : 0, color: '#ef4444' },
+    ];
+    setPieData(pieChartData);
+
+    // Line chart data for reports over time (last 7 days)
+    const last7Days = Array.from({ length: 7 }, (_, i) => {
+      const date = new Date();
+      date.setDate(date.getDate() - (6 - i));
+      return date.toISOString().split('T')[0];
+    });
+
+    const lineChartData = last7Days.map(date => {
+      const dayReports = reports.filter(report =>
+        new Date(report.createdAt).toISOString().split('T')[0] === date
+      );
+      return {
+        date: new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        reports: dayReports.length,
+        resolved: dayReports.filter(r => r.status === 'RESOLVED').length,
+        unresolved: dayReports.filter(r => r.status === 'DRAFT' || r.status === 'UNDER INVESTIGATION').length,
+      };
+    });
+    setLineData(lineChartData);
   };
 
   const exportToPDF = async () => {
@@ -612,13 +676,96 @@ export default function RedFlags() {
           </div>
         </div>
 
-        <Button
-          onClick={() => navigate("/create?type=red-flag")}
-          className="mb-32 shadow-sm hover:shadow-md transition-shadow"
-        >
-          <Plus size={20} className="mr-2" />
-          Create Red Flag
-        </Button>
+        {/* Analytics Toggle Button */}
+        <div className="flex gap-4 mb-6">
+          <Button
+            onClick={() => navigate("/create?type=red-flag")}
+            className="shadow-sm hover:shadow-md transition-shadow"
+          >
+            <Plus size={20} className="mr-2" />
+            Create Red Flag
+          </Button>
+          <Button
+            onClick={() => setShowCharts(!showCharts)}
+            variant="outline"
+            className="shadow-sm hover:shadow-md transition-shadow"
+          >
+            {showCharts ? <BarChart3 size={20} className="mr-2" /> : <Activity size={20} className="mr-2" />}
+            {showCharts ? 'Hide Analytics' : 'Show Analytics'}
+          </Button>
+        </div>
+
+        {/* Interactive Charts Section */}
+        {showCharts && (
+          <div className="mb-8 space-y-6">
+            <h3 className="text-xl font-semibold text-foreground mb-4">Analytics Dashboard</h3>
+
+            {/* Charts Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Bar Chart - Status Distribution */}
+              <div className="bg-card border border-border rounded-lg p-6 shadow-sm">
+                <h4 className="text-lg font-medium mb-4 text-foreground flex items-center gap-2">
+                  <BarChart3 size={20} />
+                  Status Distribution
+                </h4>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={chartData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar dataKey="value" fill="#8884d8" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* Pie Chart - Status Percentages */}
+              <div className="bg-card border border-border rounded-lg p-6 shadow-sm">
+                <h4 className="text-lg font-medium mb-4 text-foreground flex items-center gap-2">
+                  <PieChart size={20} />
+                  Status Breakdown
+                </h4>
+                <ResponsiveContainer width="100%" height={300}>
+                  <RechartsPieChart>
+                    <Pie
+                      data={pieData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ name, percentage }) => `${name}: ${percentage}%`}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {pieData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </RechartsPieChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* Line Chart - Reports Over Time */}
+            <div className="bg-card border border-border rounded-lg p-6 shadow-sm">
+              <h4 className="text-lg font-medium mb-4 text-foreground flex items-center gap-2">
+                <LineChart size={20} />
+                Reports Trend (Last 7 Days)
+              </h4>
+              <ResponsiveContainer width="100%" height={300}>
+                <AreaChart data={lineData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" />
+                  <YAxis />
+                  <Tooltip />
+                  <Area type="monotone" dataKey="reports" stackId="1" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
+                  <Area type="monotone" dataKey="resolved" stackId="2" stroke="#82ca9d" fill="#82ca9d" fillOpacity={0.6} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        )}
         {loading ? (
           <div className="space-y-6">
             {/* Skeleton Loading Cards */}

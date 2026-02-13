@@ -16,7 +16,8 @@ const LoginForm: React.FC<{
   onSuccess: () => void;
   formErrors: {[key: string]: string};
   setFormErrors: (errors: {[key: string]: string}) => void;
-}> = ({ onSuccess, formErrors, setFormErrors }) => {
+  onSwitchToSignup: () => void;
+}> = ({ onSuccess, formErrors, setFormErrors, onSwitchToSignup }) => {
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [loginLoading, setLoginLoading] = useState(false);
@@ -231,6 +232,19 @@ const LoginForm: React.FC<{
           </Button>
         </div>
       </form>
+
+      {/* Switch to Signup Link */}
+      <div className="mt-6 text-center">
+        <p className="text-sm text-gray-600">
+          Don't have an account?{' '}
+          <button
+            onClick={onSwitchToSignup}
+            className="font-medium text-blue-600 hover:text-blue-500 transition-colors duration-200"
+          >
+            Sign up
+          </button>
+        </p>
+      </div>
     </div>
   );
 };
@@ -240,7 +254,8 @@ const SignupForm: React.FC<{
   onSuccess: () => void;
   formErrors: {[key: string]: string};
   setFormErrors: (errors: {[key: string]: string}) => void;
-}> = ({ onSuccess, formErrors, setFormErrors }) => {
+  onSwitchToLogin: () => void;
+}> = ({ onSuccess, formErrors, setFormErrors, onSwitchToLogin }) => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [signupEmail, setSignupEmail] = useState("");
@@ -368,58 +383,91 @@ const SignupForm: React.FC<{
   };
 
   return (
-    <div className="relative z-10 animate-fade-in" style={{ animationDelay: '0.8s' }}>
+    <div className="relative z-10 animate-fade-in signup-form-container" style={{ animationDelay: '0.8s' }}>
+      {/* Enhanced Header */}
       <div className="mb-8 text-center">
-        <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-green-100 to-emerald-100 rounded-full mb-4">
-          <Sparkles className="h-6 w-6 text-green-600" />
+        <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-emerald-400 via-green-500 to-teal-600 rounded-2xl mb-6 shadow-lg shadow-green-500/30 animate-bounce-gentle">
+          <Sparkles className="h-8 w-8 text-white" />
         </div>
-        <h3 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-3">Join the movement!</h3>
-        <p className="text-gray-600 text-sm leading-relaxed">Create your account and start reporting corruption anonymously</p>
+        <h3 className="text-3xl font-bold bg-gradient-to-r from-emerald-600 via-green-600 to-teal-600 bg-clip-text text-transparent mb-4 animate-pulse-slow">
+          Join the Movement!
+        </h3>
+        <p className="text-gray-600 text-base leading-relaxed max-w-xs mx-auto">
+          Create your account and start making a difference by reporting corruption anonymously
+        </p>
       </div>
 
-      <form className="space-y-4" onSubmit={handleSignup}>
-        <div className="flex flex-col gap-4">
-          <div>
-            <Label htmlFor="firstname" className="block text-xs font-medium text-gray-700 mb-1.5">
+      <form className="space-y-6" onSubmit={handleSignup}>
+        {/* Name Fields in a Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="form-field-group">
+            <Label htmlFor="firstname" className="form-label">
               First Name
             </Label>
-            <Input
-              id="firstname"
-              name="firstname"
-              type="text"
-              autoComplete="given-name"
-              required
-              aria-label="First name"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              className="auth-input block w-full px-3 py-2 text-sm"
-              placeholder="First name"
-            />
-            {formErrors.firstName && <p className="mt-0.5 text-xs text-red-600">{formErrors.firstName}</p>}
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Users className="h-5 w-5 text-gray-400" />
+              </div>
+              <Input
+                id="firstname"
+                name="firstname"
+                type="text"
+                autoComplete="given-name"
+                required
+                aria-label="First name"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                className={`auth-input-enhanced block w-full pl-10 pr-3 py-3 text-sm rounded-xl ${
+                  formErrors.firstName ? 'border-red-300 focus:ring-red-500' : ''
+                }`}
+                placeholder="Enter first name"
+              />
+              {formErrors.firstName && <AlertCircle className="absolute right-3 top-3.5 h-5 w-5 text-red-500" />}
+            </div>
+            {formErrors.firstName && (
+              <p className="mt-1 text-xs text-red-600 flex items-center">
+                <AlertCircle className="h-4 w-4 mr-1" />
+                {formErrors.firstName}
+              </p>
+            )}
           </div>
 
-          <div>
-            <Label htmlFor="lastname" className="block text-xs font-medium text-gray-700 mb-1.5">
+          <div className="form-field-group">
+            <Label htmlFor="lastname" className="form-label">
               Last Name
             </Label>
-            <Input
-              id="lastname"
-              name="lastname"
-              type="text"
-              autoComplete="family-name"
-              required
-              aria-label="Last name"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 text-sm"
-              placeholder="Last name"
-            />
-            {formErrors.lastName && <p className="mt-0.5 text-xs text-red-600">{formErrors.lastName}</p>}
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Users className="h-5 w-5 text-gray-400" />
+              </div>
+              <Input
+                id="lastname"
+                name="lastname"
+                type="text"
+                autoComplete="family-name"
+                required
+                aria-label="Last name"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                className={`auth-input-enhanced block w-full pl-10 pr-3 py-3 text-sm rounded-xl ${
+                  formErrors.lastName ? 'border-red-300 focus:ring-red-500' : ''
+                }`}
+                placeholder="Enter last name"
+              />
+              {formErrors.lastName && <AlertCircle className="absolute right-3 top-3.5 h-5 w-5 text-red-500" />}
+            </div>
+            {formErrors.lastName && (
+              <p className="mt-1 text-xs text-red-600 flex items-center">
+                <AlertCircle className="h-4 w-4 mr-1" />
+                {formErrors.lastName}
+              </p>
+            )}
           </div>
         </div>
 
-        <div>
-          <Label htmlFor="signup-email" className="block text-xs font-medium text-gray-700 mb-1.5">
+        {/* Email Field */}
+        <div className="form-field-group">
+          <Label htmlFor="signup-email" className="form-label">
             Email Address
           </Label>
           <div className="relative">
@@ -434,16 +482,25 @@ const SignupForm: React.FC<{
               required
               value={signupEmail}
               onChange={(e) => setSignupEmail(e.target.value)}
-              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 text-sm"
+              className={`auth-input-enhanced block w-full pl-10 pr-3 py-3 text-sm rounded-xl ${
+                formErrors.signupEmail ? 'border-red-300 focus:ring-red-500' : ''
+              }`}
               placeholder="Enter your email address"
             />
+            {formErrors.signupEmail && <AlertCircle className="absolute right-3 top-3.5 h-5 w-5 text-red-500" />}
           </div>
-          {formErrors.signupEmail && <p className="mt-0.5 text-xs text-red-600">{formErrors.signupEmail}</p>}
+          {formErrors.signupEmail && (
+            <p className="mt-1 text-xs text-red-600 flex items-center">
+              <AlertCircle className="h-4 w-4 mr-1" />
+              {formErrors.signupEmail}
+            </p>
+          )}
         </div>
 
-        <div>
-          <Label htmlFor="signup-password" className="block text-xs font-medium text-gray-700 mb-1.5">
-            Password
+        {/* Password Field */}
+        <div className="form-field-group">
+          <Label htmlFor="signup-password" className="form-label">
+            Create Password
           </Label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -457,13 +514,15 @@ const SignupForm: React.FC<{
               required
               value={signupPassword}
               onChange={(e) => setSignupPassword(e.target.value)}
-              className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 text-sm"
-              placeholder="Create a password"
+              className={`auth-input-enhanced block w-full pl-10 pr-12 py-3 text-sm rounded-xl ${
+                formErrors.signupPassword ? 'border-red-300 focus:ring-red-500' : ''
+              }`}
+              placeholder="Create a strong password"
             />
             {signupPassword && (
               <button
                 type="button"
-                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center hover:scale-110 transition-transform"
                 onClick={() => setShowSignupPassword(!showSignupPassword)}
               >
                 {showSignupPassword ? (
@@ -473,27 +532,29 @@ const SignupForm: React.FC<{
                 )}
               </button>
             )}
+            {formErrors.signupPassword && <AlertCircle className="absolute right-12 top-3.5 h-5 w-5 text-red-500" />}
           </div>
-          {/* Password Strength Indicator */}
+
+          {/* Enhanced Password Strength Indicator */}
           {signupPassword && (
-            <div className="mt-2">
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-xs text-gray-600">Password strength:</span>
-                <span className={`text-xs font-medium ${
-                  passwordStrength <= 2 ? 'text-red-500' :
-                  passwordStrength <= 3 ? 'text-yellow-500' :
-                  passwordStrength <= 4 ? 'text-blue-500' : 'text-green-500'
+            <div className="mt-3 p-3 bg-gray-50 rounded-lg border">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-gray-700">Password Strength</span>
+                <span className={`text-sm font-semibold ${
+                  passwordStrength <= 2 ? 'text-red-600' :
+                  passwordStrength <= 3 ? 'text-yellow-600' :
+                  passwordStrength <= 4 ? 'text-blue-600' : 'text-green-600'
                 }`}>
                   {passwordStrength <= 2 ? 'Weak' :
                    passwordStrength <= 3 ? 'Fair' :
-                   passwordStrength <= 4 ? 'Good' : 'Strong'}
+                   passwordStrength <= 4 ? 'Good' : 'Excellent'}
                 </span>
               </div>
-              <div className="flex space-x-1">
+              <div className="flex space-x-1 mb-2">
                 {[1, 2, 3, 4, 5].map((level) => (
                   <div
                     key={level}
-                    className={`h-1 flex-1 rounded-full transition-colors duration-200 ${
+                    className={`h-2 flex-1 rounded-full transition-all duration-300 ${
                       level <= passwordStrength
                         ? passwordStrength <= 2 ? 'bg-red-500' :
                           passwordStrength <= 3 ? 'bg-yellow-500' :
@@ -503,31 +564,66 @@ const SignupForm: React.FC<{
                   />
                 ))}
               </div>
+              <div className="text-xs text-gray-600">
+                Use at least 8 characters with uppercase, lowercase, numbers, and symbols.
+              </div>
             </div>
           )}
-          {formErrors.signupPassword && <p className="mt-0.5 text-xs text-red-600">{formErrors.signupPassword}</p>}
+          {formErrors.signupPassword && (
+            <p className="mt-1 text-xs text-red-600 flex items-center">
+              <AlertCircle className="h-4 w-4 mr-1" />
+              {formErrors.signupPassword}
+            </p>
+          )}
         </div>
 
-        <div>
+        {/* Submit Button */}
+        <div className="pt-2">
           <Button
             type="submit"
             disabled={signupLoading}
-            className={`auth-button auth-button-signup group relative w-full flex justify-center py-3 px-6 text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed ${signupLoading ? 'auth-loading' : ''}`}
+            className={`auth-button-signup-enhanced group relative w-full flex justify-center py-4 px-6 text-base font-bold disabled:opacity-50 disabled:cursor-not-allowed rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 ${
+              signupLoading ? 'auth-loading' : ''
+            }`}
           >
             {signupLoading ? (
               <>
-                <Loader2 className="animate-spin -ml-1 mr-3 h-5 w-5" />
-                Creating account...
+                <Loader2 className="animate-spin -ml-1 mr-3 h-6 w-6" />
+                Creating Your Account...
               </>
             ) : (
-              <div className="flex items-center space-x-2">
-                <Sparkles className="h-5 w-5" />
-                <span>Create account</span>
+              <div className="flex items-center space-x-3">
+                <Sparkles className="h-6 w-6 group-hover:animate-spin" />
+                <span>Join iReporter Now</span>
+                <TrendingUp className="h-5 w-5" />
               </div>
             )}
           </Button>
         </div>
       </form>
+
+      {/* Additional Info */}
+      <div className="mt-6 text-center">
+        <p className="text-xs text-gray-500">
+          By creating an account, you agree to our{' '}
+          <button className="text-emerald-600 hover:text-emerald-700 font-medium underline transition-colors">
+            Terms
+          </button>{' '}
+          and{' '}
+          <button className="text-emerald-600 hover:text-emerald-700 font-medium underline transition-colors">
+            Privacy Policy
+          </button>
+        </p>
+        <p className="text-sm text-gray-600 mt-4">
+          Already have an account?{' '}
+          <button
+            onClick={onSwitchToLogin}
+            className="font-medium text-blue-600 hover:text-blue-500 transition-colors duration-200"
+          >
+            Sign in
+          </button>
+        </p>
+      </div>
     </div>
   );
 };
@@ -563,49 +659,28 @@ export default function Auth() {
             <Flag className="h-10 w-10 text-white animate-pulse" />
           </div>
           <h2 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-gray-700 bg-clip-text text-transparent mb-4 animate-fade-in" style={{ animationDelay: '0.4s' }}>
-            Welcome to iReporter
+            {showLogin ? 'Sign in to iReporter' : 'Create your iReporter account'}
           </h2>
           <p className="text-gray-600 text-base font-medium leading-relaxed max-w-sm mx-auto animate-fade-in" style={{ animationDelay: '0.6s' }}>
-            Report corruption and interventions anonymously with confidence
+            {showLogin ? 'Enter your credentials to access your account' : 'Join the movement and start making a difference'}
           </p>
         </div>
 
         {/* Clean Auth Card Container */}
         <div className="auth-card animate-slide-up" style={{ animationDelay: '0.6s' }}>
-
-          {/* Enhanced Tab Navigation */}
-          <div className="auth-tabs flex mb-8">
-            <button
-              onClick={() => setShowLogin(true)}
-              className={`auth-tab flex-1 ${showLogin ? 'active' : ''}`}
-            >
-              <div className="flex items-center justify-center space-x-2">
-                <Mail className={`h-4 w-4 auth-icon ${showLogin ? '' : 'text-gray-600'}`} />
-                <span>Sign In</span>
-              </div>
-            </button>
-            <button
-              onClick={() => setShowLogin(false)}
-              className={`auth-tab flex-1 ${!showLogin ? 'active' : ''}`}
-            >
-              <div className="flex items-center justify-center space-x-2">
-                <Users className={`h-4 w-4 auth-icon ${!showLogin ? '' : 'text-gray-600'}`} />
-                <span>Sign Up</span>
-              </div>
-            </button>
-          </div>
-
           {showLogin ? (
             <LoginForm
               onSuccess={() => {}}
               formErrors={formErrors}
               setFormErrors={setFormErrors}
+              onSwitchToSignup={() => setShowLogin(false)}
             />
           ) : (
             <SignupForm
               onSuccess={() => {}}
               formErrors={formErrors}
               setFormErrors={setFormErrors}
+              onSwitchToLogin={() => setShowLogin(true)}
             />
           )}
         </div>

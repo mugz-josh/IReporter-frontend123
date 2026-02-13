@@ -1,11 +1,40 @@
-import React from "react";
-import { Flag, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin, Heart, Shield, Users, TrendingUp, Award, Globe, Zap } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Flag, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin, Heart, Shield, Users, TrendingUp, Award, Globe, Zap, ChevronUp, Star, Sparkles } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import "@/styles/footer.css";
 
 export const Footer: React.FC = () => {
   const { t } = useTranslation();
   const currentYear = new Date().getFullYear();
+  const [animatedStats, setAnimatedStats] = useState({ reports: 0, users: 0, countries: 0, resolution: 0 });
+
+  // Animated counter effect
+  useEffect(() => {
+    const targetStats = { reports: 25, users: 15, countries: 75, resolution: 98 };
+    const duration = 2000;
+    const steps = 60;
+    const increment = duration / steps;
+
+    let currentStep = 0;
+    const timer = setInterval(() => {
+      currentStep++;
+      const progress = currentStep / steps;
+
+      setAnimatedStats({
+        reports: Math.floor(targetStats.reports * progress),
+        users: Math.floor(targetStats.users * progress),
+        countries: Math.floor(targetStats.countries * progress),
+        resolution: Math.floor(targetStats.resolution * progress)
+      });
+
+      if (currentStep >= steps) {
+        clearInterval(timer);
+        setAnimatedStats(targetStats);
+      }
+    }, increment);
+
+    return () => clearInterval(timer);
+  }, []);
 
   return (
     <footer className="app-footer">
@@ -13,7 +42,7 @@ export const Footer: React.FC = () => {
       <div className="footer-bg-effects">
         <div className="footer-gradient-overlay"></div>
         <div className="footer-particles">
-          {[...Array(15)].map((_, i) => (
+          {[...Array(25)].map((_, i) => (
             <div
               key={i}
               className="footer-particle"
@@ -21,7 +50,24 @@ export const Footer: React.FC = () => {
                 left: `${Math.random() * 100}%`,
                 top: `${Math.random() * 100}%`,
                 animationDelay: `${Math.random() * 3}s`,
-                animationDuration: `${3 + Math.random() * 2}s`
+                animationDuration: `${3 + Math.random() * 2}s`,
+                width: `${Math.random() * 6 + 2}px`,
+                height: `${Math.random() * 6 + 2}px`
+              }}
+            />
+          ))}
+        </div>
+        {/* Floating geometric shapes */}
+        <div className="floating-shapes">
+          {[...Array(8)].map((_, i) => (
+            <div
+              key={`shape-${i}`}
+              className={`floating-shape shape-${i % 4}`}
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 4}s`,
+                animationDuration: `${6 + Math.random() * 4}s`
               }}
             />
           ))}
@@ -69,7 +115,7 @@ export const Footer: React.FC = () => {
               </div>
             </div>
 
-            {/* Trust Indicators */}
+            {/* Trust Indicators - Simplified */}
             <div className="footer-trust-indicators">
               <div className="trust-item">
                 <Shield size={16} />
@@ -78,10 +124,6 @@ export const Footer: React.FC = () => {
               <div className="trust-item">
                 <Award size={16} />
                 <span>Certified Platform</span>
-              </div>
-              <div className="trust-item">
-                <Globe size={16} />
-                <span>50+ Countries</span>
               </div>
             </div>
           </div>
@@ -187,9 +229,10 @@ export const Footer: React.FC = () => {
               <div className="newsletter-input">
                 <input type="email" placeholder="Enter your email" />
                 <button type="submit" className="newsletter-btn">
-                  <Mail size={16} />
+                  Subscribe
                 </button>
               </div>
+              <p className="newsletter-privacy">We respect your privacy. No spam.</p>
             </div>
           </div>
         </div>
@@ -213,37 +256,53 @@ export const Footer: React.FC = () => {
             <div className="stat-item">
               <div className="stat-icon">
                 <Flag size={20} />
+                <div className="stat-glow"></div>
               </div>
               <div className="stat-content">
-                <span className="stat-number">25K+</span>
+                <span className="stat-number">{animatedStats.reports}K+</span>
                 <span className="stat-label">Reports Filed</span>
+              </div>
+              <div className="stat-sparkle">
+                <Sparkles size={12} />
               </div>
             </div>
             <div className="stat-item">
               <div className="stat-icon">
                 <Users size={20} />
+                <div className="stat-glow"></div>
               </div>
               <div className="stat-content">
-                <span className="stat-number">15K+</span>
+                <span className="stat-number">{animatedStats.users}K+</span>
                 <span className="stat-label">Active Users</span>
+              </div>
+              <div className="stat-sparkle">
+                <Sparkles size={12} />
               </div>
             </div>
             <div className="stat-item">
               <div className="stat-icon">
                 <Globe size={20} />
+                <div className="stat-glow"></div>
               </div>
               <div className="stat-content">
-                <span className="stat-number">75+</span>
+                <span className="stat-number">{animatedStats.countries}+</span>
                 <span className="stat-label">Countries</span>
+              </div>
+              <div className="stat-sparkle">
+                <Sparkles size={12} />
               </div>
             </div>
             <div className="stat-item">
               <div className="stat-icon">
                 <Award size={20} />
+                <div className="stat-glow"></div>
               </div>
               <div className="stat-content">
-                <span className="stat-number">98%</span>
+                <span className="stat-number">{animatedStats.resolution}%</span>
                 <span className="stat-label">Resolution Rate</span>
+              </div>
+              <div className="stat-sparkle">
+                <Sparkles size={12} />
               </div>
             </div>
           </div>
