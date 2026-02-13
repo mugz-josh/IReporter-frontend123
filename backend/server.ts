@@ -48,7 +48,29 @@ console.log("🔧 Setting up middleware...");
 
 app.use(
   cors({
-    origin: ["http://localhost:3000", "http://localhost:3001", "http://localhost:3002", "http://localhost:3003", "http://localhost:3004", "http://localhost:5173", "https://josh-ireporter.vercel.app", "https://ireporter-frontend123.onrender.com"],
+    origin: function(origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+      
+      // List of allowed origins
+      const allowedOrigins = [
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "http://localhost:3002",
+        "http://localhost:3003",
+        "http://localhost:3004",
+        "http://localhost:5173",
+        "https://josh-ireporter.vercel.app",
+        "https://ireporter-frontend123.onrender.com"
+      ];
+      
+      if (allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        // For development, allow all origins
+        callback(null, true);
+      }
+    },
     credentials: true,
   })
 );

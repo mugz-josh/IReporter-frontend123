@@ -32,10 +32,22 @@ const pool = new Pool({
 const initializeTables = async () => {
   try {
     console.log('🔧 Initializing PostgreSQL tables...');
-    console.log('📂 SQL file path:', path.join(__dirname, 'init-postgres.sql'));
 
-    // Read and execute the SQL file
-    const sqlPath = path.join(__dirname, 'init-postgres.sql');
+    // Try multiple possible paths for the SQL file (development vs production)
+    let sqlPath = path.join(__dirname, 'init-postgres.sql');
+
+    // In production (Render), the file might be in the source directory
+    if (!fs.existsSync(sqlPath)) {
+      sqlPath = path.join(__dirname, '..', '..', 'backend', 'config', 'init-postgres.sql');
+    }
+
+    // If still not found, try relative to the project root
+    if (!fs.existsSync(sqlPath)) {
+      sqlPath = path.join(process.cwd(), 'backend', 'config', 'init-postgres.sql');
+    }
+
+    console.log('📂 SQL file path:', sqlPath);
+
     if (!fs.existsSync(sqlPath)) {
       console.error(`❌ SQL file not found at: ${sqlPath}`);
       throw new Error(`SQL initialization file not found at ${sqlPath}`);
