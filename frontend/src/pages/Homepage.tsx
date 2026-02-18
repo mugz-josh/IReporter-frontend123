@@ -99,17 +99,21 @@ const handleSignup = () => {
             <Flag size={24} style={{ color: "hsl(var(--destructive))" }} />
             <h1 style={{ margin: 0 }}>iReporter</h1>
           </div>
+          
+          {/* Desktop Navigation */}
           <nav className="header-nav">
-            <a href="#features" className="nav-link">
+            <a href="#Features" className="nav-link">
               {t('nav.features')}
             </a>
-            <a href="#how-it-works" className="nav-link">
+            <a href="#How-it-works" className="nav-link">
               {t('nav.howItWorks')}
             </a>
             <a href="#impact" className="nav-link">
               {t('nav.impact')}
             </a>
           </nav>
+          
+          {/* Desktop Actions */}
           <div className="header-actions">
             <ThemeSelector />
             <LanguageSelector />
@@ -123,7 +127,70 @@ const handleSignup = () => {
               {t('GetStarted')}
             </button>
           </div>
+
+          {/* Mobile Hamburger Button */}
+          <button 
+            className="mobile-hamburger"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+
+          {/* Mobile Navigation Menu */}
+          <div className={`mobile-nav-menu ${isMobileMenuOpen ? 'mobile-nav-open' : ''}`}>
+            <nav className="mobile-nav">
+              <a 
+                href="#features" 
+                className="mobile-nav-link"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                {t('nav.features')}
+              </a>
+              <a 
+                href="#how-it-works" 
+                className="mobile-nav-link"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                {t('nav.HowItWorks')}
+              </a>
+              <a 
+                href="#impact" 
+                className="mobile-nav-link"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                {t('nav.impact')}
+              </a>
+              <div className="mobile-nav-divider"></div>
+              <button
+                className="mobile-nav-btn btn-ghost"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  navigate("/login", { state: { mode: "login" } });
+                }}
+              >
+                {t('login')}
+              </button>
+              <button 
+                className="mobile-nav-btn btn-primary"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  handleSignup();
+                }}
+              >
+                {t('GetStarted')}
+              </button>
+            </nav>
+          </div>
         </div>
+        
+        {/* Mobile Menu Overlay */}
+        {isMobileMenuOpen && (
+          <div 
+            className="mobile-menu-overlay"
+            onClick={() => setIsMobileMenuOpen(false)}
+          ></div>
+        )}
       </header>
 
       
@@ -361,7 +428,7 @@ const handleSignup = () => {
             <Quote size={24} />
             <p className="testimonial-quote">"iReporter helped me report corruption in my local government. The process was secure and anonymous, and I saw real change."</p>
             <div className="testimonial-author">
-              <p className="author-name">Sarah Johnson</p>
+              <p className="author-name">Carol Johnson</p>
               <p className="author-role">Community Activist</p>
             </div>
           </div>
@@ -377,7 +444,7 @@ const handleSignup = () => {
             <Quote size={24} />
             <p className="testimonial-quote">"As a journalist, iReporter has been invaluable for gathering citizen reports and holding authorities accountable."</p>
             <div className="testimonial-author">
-              <p className="author-name">Amina Okafor</p>
+              <p className="author-name">Nankunda Felisha</p>
               <p className="author-role">Investigative Journalist</p>
             </div>
           </div>
@@ -386,9 +453,9 @@ const handleSignup = () => {
 
       <section className="success-stories-section">
         <div className="success-stories-content">
-          <h2 className="success-stories-title">{t('recentSuccess')}</h2>
+          <h2 className="success-stories-title">{t('RecentSuccess')}</h2>
           <p className="success-stories-subtitle">
-            {t('seeChangeCommunity')}
+            {t('SeeChangeCommunity')}
           </p>
           <div className="success-stories-grid">
             <div className="success-story-card">
@@ -440,7 +507,7 @@ const handleSignup = () => {
                 </div>
                 <div>
                   <div className="success-story-category">Intervention Request</div>
-                  <div className="success-story-location">Nairobi, Kenya</div>
+                  <div className="success-story-location">Kampala, Uganda</div>
                 </div>
               </div>
               <h3 className="success-story-title">Broken Street Lights Fixed</h3>
@@ -471,7 +538,7 @@ const handleSignup = () => {
                 </div>
                 <div>
                   <div className="success-story-category">Healthcare Issue</div>
-                  <div className="success-story-location">Accra, Ghana</div>
+                  <div className="success-story-location">Dare-salam, Tanzania</div>
                 </div>
               </div>
               <h3 className="success-story-title">Hospital Equipment Restored</h3>
@@ -501,8 +568,8 @@ const handleSignup = () => {
       </section>
 
       <section className="partners-section">
-        <h2 className="section-title">{t('trustedPartners')}</h2>
-        <p className="section-subtitle">{t('workingTogether')}</p>
+        <h2 className="section-title">{t('TrustedPartners')}</h2>
+        <p className="section-subtitle">{t('WorkingTogether')}</p>
         <div className="partners-grid">
           <div className="partner-logo">
             <div className="partner-placeholder">
@@ -545,48 +612,59 @@ const handleSignup = () => {
 
       <section className="mobile-app-section">
         <div className="mobile-app-content">
-          <h2 className="mobile-app-title">{t('getApp')}</h2>
-          <p className="mobile-app-description">
-            {t('appDesc')}
-          </p>
-          <div className="app-stores">
-            <a
-              href="https://apps.apple.com/app/ireporter/id1234567890"
-              className="app-store-btn"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Apple className="app-store-icon" />
-              <div className="app-store-text">
-                <span className="app-store-label">Download on the</span>
-                <span className="app-store-name">App Store</span>
+          <div className="mobile-app-layout">
+            <div className="mobile-app-text">
+              <h2 className="mobile-app-title">{t('GetApp')}</h2>
+              <p className="mobile-app-description">
+                {t('AppDesc')}
+              </p>
+              <div className="app-stores">
+                <a
+                  href="https://apps.apple.com/app/ireporter/id1234567890"
+                  className="app-store-btn"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Apple className="app-store-icon" />
+                  <div className="app-store-text">
+                    <span className="app-store-label">Download on the</span>
+                    <span className="app-store-name">App Store</span>
+                  </div>
+                </a>
+                <a
+                  href="https://play.google.com/store/apps/details?id=com.ireporter.app"
+                  className="app-store-btn"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Play className="app-store-icon" />
+                  <div className="app-store-text">
+                    <span className="app-store-label">Get it on</span>
+                    <span className="app-store-name">Google Play</span>
+                  </div>
+                </a>
               </div>
-            </a>
-            <a
-              href="https://play.google.com/store/apps/details?id=com.ireporter.app"
-              className="app-store-btn"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Play className="app-store-icon" />
-              <div className="app-store-text">
-                <span className="app-store-label">Get it on</span>
-                <span className="app-store-name">Google Play</span>
-              </div>
-            </a>
+            </div>
+            <div className="mobile-app-image">
+              <img 
+                src="https://image.made-in-china.com/365f3j00cuUjabQZvWoE/6-56-Inches-Cell-Phone-Android-12-Mobile-Phone-Uniwa-X19s-4G-Android-Global-Version-Smartphone.webp" 
+                alt="iReporter Mobile App" 
+                className="smartphone-image"
+              />
+            </div>
           </div>
         </div>
       </section>
 
       <section className="cta-mid-section">
         <div className="cta-mid-content">
-          <h2 className="cta-mid-title">{t('readyToMakeDifference')}</h2>
+          <h2 className="cta-mid-title">{t('ReadyToMakeDifference')}</h2>
           <p className="cta-mid-description">
-            {t('joinThousands')}
+            {t('JoinThousands')}
           </p>
           <div className="cta-final-buttons">
             <button className="btn-primary btn-lg" onClick={handleSignup}>
-              {t('createAccountBtn')}
+              {t('CreateAccountBtn')}
             </button>
             <button
               className="btn-secondary btn-lg"

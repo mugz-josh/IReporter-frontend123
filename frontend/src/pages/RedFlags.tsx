@@ -113,7 +113,7 @@ export default function RedFlags() {
     }
     loadReports();
     generateChartData();
-  }, [currentUser, reports]);
+  }, [currentUser]);
 
   const loadReports = async () => {
     try {

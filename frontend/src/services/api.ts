@@ -179,11 +179,11 @@ export const api = {
   },
 
   getUpvotes: async (reportType: string, reportId: string): Promise<ApiResponse<any>> => {
-    return fetchGet(`/v1/${reportType}s/${reportId}/upvotes`);
+    return fetchGet(`/v1/${reportType}/${reportId}/upvotes`);
   },
 
   toggleUpvote: async (reportType: string, reportId: string): Promise<ApiResponse<any>> => {
-    return fetchPost(`/v1/${reportType}/${reportId}/toggle-upvote`, {});
+    return fetchPost(`/v1/${reportType}/${reportId}/upvotes`, {});
   },
 };
 

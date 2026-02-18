@@ -1,10 +1,36 @@
 /* Modern Footer Design */
 .app-footer {
   background: linear-gradient(135deg, hsl(var(--background)) 0%, hsl(var(--muted)) 100%);
+  background-image: url('https://img.freepik.com/premium-photo/denominations-dollars-various-face-value-handcuffs-placed-them_888684-610.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
   border-top: 2px solid hsl(var(--primary) / 0.1);
   padding: 3rem 0 1rem;
   margin-top: auto;
   position: relative;
+}
+
+/* Light overlay to make background image more visible */
+.app-footer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, 
+    hsl(var(--background) / 0.7) 0%, 
+    hsl(var(--muted) / 0.6) 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Ensure content is above the overlay */
+.footer-main,
+.footer-bottom {
+  position: relative;
+  z-index: 1;
 }
 
 .app-footer::before {
@@ -32,11 +58,12 @@
 
 .footer-section h4 {
   font-size: 1.2rem;
-  font-weight: 700;
+  font-weight: 800;
   color: hsl(var(--foreground));
   margin-bottom: 1.5rem;
   position: relative;
   padding-bottom: 0.5rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .footer-section h4::after {
@@ -68,6 +95,8 @@
   align-items: center;
   gap: 0.5rem;
   position: relative;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .footer-section a:hover {
@@ -109,18 +138,21 @@
 
 .footer-logo h3 {
   font-size: 1.8rem;
-  font-weight: 800;
+  font-weight: 900;
   margin: 0;
   background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .footer-description {
   color: hsl(var(--muted-foreground));
   line-height: 1.6;
   margin-bottom: 1.5rem;
+  font-weight: 500;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 /* Social Links */
@@ -187,8 +219,9 @@
 
 .stat-number {
   font-size: 1.2rem;
-  font-weight: 700;
+  font-weight: 800;
   color: hsl(var(--primary));
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .stat-label {
@@ -196,6 +229,7 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: hsl(var(--muted-foreground));
+  font-weight: 600;
 }
 
 /* Responsive Design */
@@ -259,5 +293,9 @@
 @media (prefers-color-scheme: dark) {
   .app-footer {
     background: linear-gradient(135deg, hsl(var(--background)) 0%, hsl(var(--muted) / 0.5) 100%);
+    background-image: url('https://img.freepik.com/premium-photo/denominations-dollars-various-face-value-handcuffs-placed-them_888684-610.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
   }
 }
