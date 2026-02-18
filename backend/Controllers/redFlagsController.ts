@@ -45,7 +45,7 @@ export const redFlagsController = {
           ORDER BY rf.created_at DESC
         `;
 
-      const result = await query(sql, isAdmin ? [] : [userId]);
+      const result = await query(sql, isAdmin ? [] : [userId as number]);
 
       const redFlagsWithParsedMedia = parseMedia(result.rows);
 
@@ -115,11 +115,15 @@ export const redFlagsController = {
         return;
       }
 
+      // Parse latitude and longitude to numbers (they come as strings from FormData)
+      const parsedLatitude = parseFloat(latitude);
+      const parsedLongitude = parseFloat(longitude);
+
       const validation = validateCreateRecord(
         title,
         description,
-        latitude,
-        longitude
+        parsedLatitude,
+        parsedLongitude
       );
       if (!validation.valid) {
         sendError(res, 400, validation.error!);
@@ -137,17 +141,20 @@ export const redFlagsController = {
           : { images: [], videos: [], audio: [] };
 
       const sql = `
-        INSERT INTO red_flags (user_id, title, description, latitude, longitude)
-        VALUES ($1, $2, $3, $4, $5)
+        INSERT INTO red_flags (user_id, title, description, latitude, longitude, images, videos, audio)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
         RETURNING id
       `;
 
       const result = await query(sql, [
-        userId,
+        userId as number,
         title,
         description,
-        latitude,
-        longitude,
+        parsedLatitude,
+        parsedLongitude,
+        media.images.length > 0 ? JSON.stringify(media.images) : null,
+        media.videos.length > 0 ? JSON.stringify(media.videos) : null,
+        media.audio.length > 0 ? JSON.stringify(media.audio) : null,
       ]);
 
       sendSuccess(
@@ -362,7 +369,7 @@ export const redFlagsController = {
       await query(updateSql, [description, id]);
 
       sendSuccess(res, 200, {
-        id: parseInt(id),
+        id: parseInt(String(id)),
         message: "Updated red-flag record's comment",
       });
     } catch (error) {
@@ -420,7 +427,7 @@ export const redFlagsController = {
       await query(deleteSql, [id]);
 
       sendSuccess(res, 200, {
-        id: parseInt(id),
+        id: parseInt(String(id)),
         message: "Red-flag record has been deleted",
       });
     } catch (error) {
@@ -494,7 +501,7 @@ export const redFlagsController = {
           `Your report "${report.title}" status changed to "${status}"`,
           "info",
           "red_flag",
-          parseInt(id, 10),
+          parseInt(String(id), 10),
         ]);
       } catch (nErr) {
         console.error("Failed to create notification after status change:");
@@ -541,7 +548,7 @@ export const redFlagsController = {
           }
 
           const governmentReportData = {
-            id: parseInt(id),
+            id: parseInt(String(id)),
             title: fullReport.title,
             description: fullReport.description || '',
             latitude: fullReport.latitude,
@@ -567,7 +574,7 @@ export const redFlagsController = {
       }
 
       sendSuccess(res, 200, {
-        id: parseInt(id),
+        id: parseInt(String(id)),
         message: "Updated red-flag record status",
       });
     } catch (error) {
@@ -677,7 +684,7 @@ export const redFlagsController = {
 
       console.log(`🎉 Total update time: ${Date.now() - startTime}ms`);
       sendSuccess(res, 200, {
-        id: parseInt(id),
+        id: parseInt(String(id)),
         message: "Updated red-flag record",
       });
     } catch (error) {
