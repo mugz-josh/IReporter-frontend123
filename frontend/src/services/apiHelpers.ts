@@ -4,7 +4,7 @@ const deployedUrl = import.meta.env.VITE_API_URL;
 
 export const API_URL = isProduction && deployedUrl
   ? `${deployedUrl}/api`
-  : "http://localhost:3001/api";
+  : "/api";
 
 export function getAuthHeaders(): HeadersInit {
   const token = localStorage.getItem("token");
