@@ -24,7 +24,7 @@ router.patch('/red-flags/:id/comment', auth.verifyToken, auth.checkRecordOwnersh
 router.post('/red-flags/:id/media', auth.verifyToken, auth.checkRecordOwnership('red_flags'), upload.array('media', 2), redFlagsController.addMedia);
 router.delete('/red-flags/:id', auth.verifyToken, auth.checkRecordOwnership('red_flags'), redFlagsController.deleteRedFlag);
 router.patch('/red-flags/:id/status', auth.verifyToken, auth.isAdmin, redFlagsController.updateStatus);
-router.put('/red-flags/:id', auth.verifyToken, auth.checkRecordOwnership('red_flags'), upload.array('media', 2), redFlagsController.updateRedFlag)
+router.put('/red-flags/:id', auth.verifyToken, auth.checkRecordOwnership('red_flags'), upload.array('media', 2), redFlagsController.updateRedFlag);
 
 router.get('/notifications', auth.verifyToken, notificationController.getUserNotifications);
 router.put('/notifications/read', auth.verifyToken, notificationController.markAllAsRead);

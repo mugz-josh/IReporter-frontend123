@@ -104,6 +104,7 @@ const testConnection = async () => {
 // Test database connection on startup
 testConnection();
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const query = async (sql: string, params: any[] = []) => {
   const result = await pool.query(sql, params);
   return result;

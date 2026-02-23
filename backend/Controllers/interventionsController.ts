@@ -32,6 +32,12 @@ export const interventionsController = {
       const userId = req.user?.id;
       const isAdmin = req.user?.isAdmin;
 
+      // Validate that userId exists for non-admin requests
+      if (!isAdmin && userId === undefined) {
+        sendError(res, 401, "Authentication required");
+        return;
+      }
+
       const sql = isAdmin
         ? `
           SELECT i.*, u.first_name, u.last_name, u.email
@@ -47,7 +53,7 @@ export const interventionsController = {
           ORDER BY i.created_at DESC
         `;
 
-      const result = await query(sql, isAdmin ? [] : [userId]);
+      const result = await query(sql, isAdmin ? [] : [userId as number]);
 
       const interventionsWithParsedMedia = parseMedia(result.rows);
 
@@ -122,11 +128,15 @@ export const interventionsController = {
         return;
       }
 
+      // Parse latitude and longitude to numbers (they come as strings from FormData)
+      const parsedLatitude = parseFloat(latitude);
+      const parsedLongitude = parseFloat(longitude);
+
       const validation = validateCreateRecord(
         title,
         description,
-        latitude,
-        longitude
+        parsedLatitude,
+        parsedLongitude
       );
       if (!validation.valid) {
         sendError(res, 400, validation.error!);
@@ -150,11 +160,11 @@ export const interventionsController = {
       `;
 
       const result = await query(sql, [
-        userId,
+        userId as number,
         title,
         description,
-        latitude,
-        longitude,
+        parsedLatitude,
+        parsedLongitude,
         media.images.length > 0 ? JSON.stringify(media.images) : null,
         media.videos.length > 0 ? JSON.stringify(media.videos) : null,
       ]);
