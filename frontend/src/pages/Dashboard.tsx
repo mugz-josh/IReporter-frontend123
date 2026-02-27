@@ -315,92 +315,98 @@ export default function Dashboard() {
           </div>
         </header>
 
-        {/* Stats Cards */}
-        <section className="stats-section">
-          <div className="stats-grid">
-            <div className="stat-card-primary">
-              <div className="stat-icon-wrapper">
-                <FilePlus size={24} />
+        {/* Overview Section - Combined Stats and Quick Actions */}
+        <section className="overview-section">
+          <div className="overview-header">
+            <h2 className="section-heading">Overview</h2>
+            <p className="section-subtitle">Your reporting activity at a glance</p>
+          </div>
+
+          {/* Key Metrics */}
+          <div className="metrics-grid">
+            <div className="metric-card primary">
+              <div className="metric-icon">
+                <FilePlus size={32} />
               </div>
-              <div className="stat-content">
-                <span className="stat-number">{stats.total}</span>
-                <span className="stat-label">Total Reports</span>
-              </div>
-              <div className="stat-trend positive">
-                <TrendingUp size={16} />
-                <span>All time</span>
+              <div className="metric-content">
+                <span className="metric-number">{stats.total}</span>
+                <span className="metric-label">Total Reports</span>
+                <div className="metric-trend positive">
+                  <TrendingUp size={14} />
+                  <span>All time</span>
+                </div>
               </div>
             </div>
 
-            <div className="stat-card-danger">
-              <div className="stat-icon-wrapper">
-                <AlertTriangle size={24} />
+            <div className="metric-card danger">
+              <div className="metric-icon">
+                <AlertTriangle size={32} />
               </div>
-              <div className="stat-content">
-                <span className="stat-number">{stats.redFlags}</span>
-                <span className="stat-label">Red Flags</span>
+              <div className="metric-content">
+                <span className="metric-number">{stats.redFlags}</span>
+                <span className="metric-label">Red Flags</span>
+                <span className="metric-desc">Corruption Reports</span>
               </div>
-              <div className="stat-badge">Corruption Reports</div>
             </div>
 
-            <div className="stat-card-success">
-              <div className="stat-icon-wrapper">
-                <CheckCircle size={24} />
+            <div className="metric-card success">
+              <div className="metric-icon">
+                <CheckCircle size={32} />
               </div>
-              <div className="stat-content">
-                <span className="stat-number">{stats.resolved}</span>
-                <span className="stat-label">Resolved</span>
+              <div className="metric-content">
+                <span className="metric-number">{stats.resolved}</span>
+                <span className="metric-label">Resolved</span>
+                <span className="metric-desc">Issues Fixed</span>
               </div>
-              <div className="stat-badge">Issues Fixed</div>
             </div>
 
-            <div className="stat-card-warning">
-              <div className="stat-icon-wrapper">
-                <Clock size={24} />
+            <div className="metric-card warning">
+              <div className="metric-icon">
+                <Clock size={32} />
               </div>
-              <div className="stat-content">
-                <span className="stat-number">{stats.underInvestigation}</span>
-                <span className="stat-label">In Progress</span>
+              <div className="metric-content">
+                <span className="metric-number">{stats.underInvestigation}</span>
+                <span className="metric-label">In Progress</span>
+                <span className="metric-desc">Awaiting Action</span>
               </div>
-              <div className="stat-badge">Awaiting Action</div>
             </div>
           </div>
-        </section>
 
-        {/* Quick Actions */}
-        <section className="quick-actions-section">
-          <h2 className="section-heading">Quick Actions</h2>
-          <div className="quick-actions-grid">
-            <Link to="/create" className="quick-action-card primary">
-              <div className="action-icon">
-                <Flag size={28} />
-              </div>
-              <div className="action-content">
-                <h3>Report Corruption</h3>
-                <p>Submit a red-flag report</p>
-              </div>
-              <ArrowRight size={20} className="action-arrow" />
-            </Link>
-            <Link to="/create" className="quick-action-card secondary">
-              <div className="action-icon">
-                <AlertCircle size={28} />
-              </div>
-              <div className="action-content">
-                <h3>Request Intervention</h3>
-                <p>Report infrastructure issues</p>
-              </div>
-              <ArrowRight size={20} className="action-arrow" />
-            </Link>
-            <Link to="/red-flags" className="quick-action-card tertiary">
-              <div className="action-icon">
-                <Eye size={28} />
-              </div>
-              <div className="action-content">
-                <h3>View All Reports</h3>
-                <p>Track your submissions</p>
-              </div>
-              <ArrowRight size={20} className="action-arrow" />
-            </Link>
+          {/* Quick Actions */}
+          <div className="actions-section">
+            <h3 className="actions-title">Quick Actions</h3>
+            <div className="actions-grid">
+              <Link to="/create" className="action-card primary">
+                <div className="action-icon">
+                  <Flag size={24} />
+                </div>
+                <div className="action-content">
+                  <h4>Report Corruption</h4>
+                  <p>Submit a red-flag report</p>
+                </div>
+                <ArrowRight size={18} className="action-arrow" />
+              </Link>
+              <Link to="/create" className="action-card secondary">
+                <div className="action-icon">
+                  <AlertCircle size={24} />
+                </div>
+                <div className="action-content">
+                  <h4>Request Intervention</h4>
+                  <p>Report infrastructure issues</p>
+                </div>
+                <ArrowRight size={18} className="action-arrow" />
+              </Link>
+              <Link to="/red-flags" className="action-card tertiary">
+                <div className="action-icon">
+                  <Eye size={24} />
+                </div>
+                <div className="action-content">
+                  <h4>View All Reports</h4>
+                  <p>Track your submissions</p>
+                </div>
+                <ArrowRight size={18} className="action-arrow" />
+              </Link>
+            </div>
           </div>
         </section>
 
