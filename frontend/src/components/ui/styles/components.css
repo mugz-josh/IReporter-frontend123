@@ -4183,6 +4183,101 @@ input {
 }
 
 /* ===============================================
+   HAMBURGER MENU SLIDE ANIMATIONS
+   =============================================== */
+
+/* Hamburger Menu Button - Enhanced */
+.mobile-menu-btn {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 50;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border: none;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px hsl(var(--primary) / 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mobile-menu-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px hsl(var(--primary) / 0.4);
+}
+
+.mobile-menu-btn:active {
+  transform: scale(0.95);
+}
+
+@media (min-width: 768px) {
+  .mobile-menu-btn {
+    display: none;
+  }
+}
+
+/* Sidebar Slide Animation */
+.page-aside {
+  width: 16rem;
+  background-color: hsl(var(--sidebar-background));
+  border-right: 1px solid hsl(var(--sidebar-border));
+  padding: 1.5rem;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  z-index: 40;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-y: auto;
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Mobile hidden state - slide out */
+.page-aside.mobile-hidden {
+  transform: translateX(-100%);
+}
+
+/* Desktop: always visible */
+@media (min-width: 768px) {
+  .page-aside {
+    position: static;
+    transform: none !important;
+    box-shadow: none;
+    height: auto;
+    min-height: 100vh;
+  }
+}
+
+/* Mobile Overlay - Enhanced with fade animation */
+.mobile-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 30;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  backdrop-filter: blur(2px);
+}
+
+.mobile-overlay.show {
+  display: block;
+  opacity: 1;
+  visibility: visible;
+}
+
+@media (min-width: 768px) {
+  .mobile-overlay {
+    display: none !important;
+  }
+}
+
+/* ===============================================
    ENHANCED HEADER STYLES
    =============================================== */
 

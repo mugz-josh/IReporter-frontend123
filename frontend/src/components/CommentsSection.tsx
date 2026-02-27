@@ -34,10 +34,43 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({ reportType, re
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [isOfficialResponse, setIsOfficialResponse] = useState(false);
+  const [participantImageLoading, setParticipantImageLoading] = useState<{[key: string]: boolean}>({});
 
   useEffect(() => {
     loadComments();
   }, [reportType, reportId]);
+
+  // Initialize and preload participant images
+  useEffect(() => {
+    if (comments.length > 0) {
+      const initialLoadingState: {[key: string]: boolean} = {};
+      comments.forEach(comment => {
+        if (comment.profile_picture) {
+          initialLoadingState[comment.id] = true;
+          // Use a more reliable image loading detection
+          const img = new Image();
+          const handleLoad = () => {
+            setParticipantImageLoading(prev => ({ ...prev, [comment.id]: false }));
+          };
+          const handleError = () => {
+            setParticipantImageLoading(prev => ({ ...prev, [comment.id]: false }));
+          };
+
+          img.addEventListener('load', handleLoad);
+          img.addEventListener('error', handleError);
+          img.src = `${import.meta.env.VITE_API_URL || "http://localhost:3000"}${comment.profile_picture}`;
+
+          // Fallback: if image doesn't load within 3 seconds, assume it's loaded
+          setTimeout(() => {
+            setParticipantImageLoading(prev => ({ ...prev, [comment.id]: false }));
+          }, 3000);
+        } else {
+          initialLoadingState[comment.id] = false;
+        }
+      });
+      setParticipantImageLoading(initialLoadingState);
+    }
+  }, [comments]);
 
   const loadComments = async () => {
     try {

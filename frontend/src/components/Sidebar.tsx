@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Home,
@@ -13,14 +13,33 @@ import {
 } from "lucide-react";
 import { useUser } from "@/contexts/UserContext";
 
-interface SidebarProps {
-  isOpen: boolean;
-  onToggle: () => void;
-  onClose: () => void;
-}
+const Sidebar: React.FC<{isOpen?: boolean; onToggle?: () => void; onClose?: () => void}> = ({isOpen, onToggle, onClose}) => {
+  const [isMenuOpen, setIsMenuOpen] = useState(isOpen ?? false);
 
-const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle, onClose }) => {
+  const toggleMenu = () => {
+    if (onToggle) {
+      onToggle();
+    } else {
+      setIsMenuOpen(!isMenuOpen);
+    }
+  };
+  const closeMenu = () => {
+    if (onClose) {
+      onClose();
+    } else {
+      setIsMenuOpen(false);
+    }
+  };
+
+  // Close menu on route change for better UX
   const location = useLocation();
+  useEffect(() => {
+    if (onClose) {
+      onClose();
+    } else {
+      setIsMenuOpen(false);
+    }
+  }, [location]);
   const navigate = useNavigate();
   const { user, setUser } = useUser();
 
@@ -72,17 +91,17 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle, onClose }) => {
   return (
     <>
       {/* Mobile overlay */}
-      {isOpen && (
-        <div className="mobile-overlay show" onClick={onClose}></div>
+      {isMenuOpen && (
+        <div className="mobile-overlay show" onClick={closeMenu}></div>
       )}
 
       {/* Mobile menu button */}
-      <button className="mobile-menu-btn" onClick={onToggle}>
-        {isOpen ? <X size={20} /> : <Menu size={20} />}
+      <button className="mobile-menu-btn" onClick={toggleMenu}>
+        {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
       </button>
 
       {/* Sidebar */}
-      <aside className={`page-aside ${!isOpen ? "mobile-hidden" : ""}`}>
+      <aside className={`page-aside ${!isMenuOpen ? "mobile-hidden" : ""}`}>
         <div className="sidebar-brand">
           <div className="brand-icon">
             <span>IR</span>
@@ -99,7 +118,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle, onClose }) => {
                 key={item.to}
                 to={item.to}
                 className={`nav-link ${isActive ? "nav-link-active" : ""}`}
-                onClick={onClose}
+                onClick={closeMenu}
               >
                 <Icon size={20} />
                 <span>{item.label}</span>

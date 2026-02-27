@@ -212,6 +212,8 @@
   width: 100%;
   position: relative;
   overflow: hidden;
+  margin: 0 auto;
+  text-align: center;
 }
 
 .auth-card::before {
@@ -222,4 +224,22 @@
   right: 0;
   height: 2px;
   background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.3), transparent);
+}
+
+/* Center the auth card - FORCE CENTER */
+.page-auth {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 100vh;
+  width: 100%;
+}
+
+.auth-container {
+  display: flex !important;
+  flex-direction: column;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100%;
+  max-width: 34rem;
 }

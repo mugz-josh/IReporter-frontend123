@@ -60,7 +60,6 @@ export default function RedFlags() {
   const navigate = useNavigate();
   const { user: currentUser, setUser } = useUser();
   const [reports, setReports] = useState<Report[]>([]);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [stats, setStats] = useState({
     resolved: 0,
     unresolved: 0,
@@ -101,7 +100,7 @@ export default function RedFlags() {
   const [pieData, setPieData] = useState<any[]>([]);
   const [lineData, setLineData] = useState<any[]>([]);
   const [showCharts, setShowCharts] = useState(false);
-
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
   const FILE_BASE = API_URL.replace(/\/api$/, "");
@@ -499,11 +498,7 @@ export default function RedFlags() {
   }`;
   return (
     <div className="page-dashboard min-h-screen bg-gray-50 dark:bg-gray-900">
-      <Sidebar
-        isOpen={sidebarOpen}
-        onToggle={() => setSidebarOpen(!sidebarOpen)}
-        onClose={() => setSidebarOpen(false)}
-      />
+      <Sidebar />
       <main className="main-content">
         {/* Breadcrumb Navigation */}
         <div className="mb-6">

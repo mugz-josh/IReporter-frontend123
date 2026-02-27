@@ -1,4 +1,4 @@
-import { Flag, LogOut, Grid3x3, Plus, Menu, X, Edit } from "lucide-react";
+import { Flag, LogOut, Grid3x3, Plus, Menu, X, Edit, Home, FilePlus, AlertCircle } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { api } from "@/services/api";
@@ -25,6 +25,8 @@ export default function Dashboard() {
     statusDistribution: [] as { name: string; value: number; color: string }[],
     monthlyData: [] as { month: string; redFlags: number; interventions: number }[],
   });
+  
+  // Mobile sidebar state
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -339,1462 +341,334 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="page-dashboard">
-      {/* Enhanced Welcome Animation */}
-      <div className="welcome-animation" style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: 'linear-gradient(135deg, hsl(var(--background)) 0%, hsl(var(--card)) 50%, hsl(var(--background)) 100%)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 9999,
-        animation: 'welcomeFadeOut 3s ease-in-out 2s forwards',
-        backdropFilter: 'blur(10px)'
-      }}>
-        {/* Animated background particles */}
-        <div className="welcome-particles" style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          overflow: 'hidden',
-          pointerEvents: 'none'
-        }}>
-          {[...Array(20)].map((_, i) => (
-            <div
-              key={i}
-              style={{
-                position: 'absolute',
-                width: '4px',
-                height: '4px',
-                background: `hsl(${Math.random() * 360}, 70%, 60%)`,
-                borderRadius: '50%',
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                animation: `particleFloat ${2 + Math.random() * 2}s ease-in-out infinite`,
-                animationDelay: `${Math.random() * 2}s`,
-                opacity: 0.6
-              }}
-            />
-          ))}
-        </div>
-
-        <div style={{
-          textAlign: 'center',
-          animation: 'welcomeSlideIn 1s cubic-bezier(0.68, -0.55, 0.265, 1.55)',
-          position: 'relative',
-          zIndex: 1
-        }}>
-          {/* Enhanced success icon with glow */}
-          <div style={{
-            width: '120px',
-            height: '120px',
-            margin: '0 auto 2rem',
-            borderRadius: '50%',
-            background: 'linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--destructive)) 50%, hsl(var(--primary)) 100%)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'white',
-            fontSize: '3rem',
-            fontWeight: 'bold',
-            boxShadow: '0 0 40px hsl(var(--primary) / 0.5), 0 0 80px hsl(var(--primary) / 0.3), inset 0 2px 10px rgba(255,255,255,0.2)',
-            animation: 'iconPulse 2s ease-in-out infinite, iconBounce 0.6s ease-out',
-            position: 'relative'
-          }}>
-            <span style={{
-              animation: 'checkmarkDraw 0.8s ease-out 0.3s both'
-            }}>✓</span>
-            {/* Decorative rings */}
-            <div style={{
-              position: 'absolute',
-              top: '-10px',
-              left: '-10px',
-              right: '-10px',
-              bottom: '-10px',
-              border: '2px solid hsl(var(--primary) / 0.3)',
-              borderRadius: '50%',
-              animation: 'ringExpand 1.5s ease-out infinite'
-            }} />
-            <div style={{
-              position: 'absolute',
-              top: '-20px',
-              left: '-20px',
-              right: '-20px',
-              bottom: '-20px',
-              border: '1px solid hsl(var(--primary) / 0.2)',
-              borderRadius: '50%',
-              animation: 'ringExpand 1.5s ease-out 0.5s infinite'
-            }} />
-          </div>
-
-          {/* Enhanced welcome text */}
-          <h2 style={{
-            color: 'hsl(var(--foreground))',
-            fontSize: '2.5rem',
-            fontWeight: '800',
-            marginBottom: '1rem',
-            background: 'linear-gradient(135deg, hsl(var(--foreground)) 0%, hsl(var(--primary)) 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-            textShadow: '0 2px 10px rgba(0,0,0,0.1)',
-            animation: 'textGlow 2s ease-in-out infinite alternate',
-            letterSpacing: '-0.02em'
-          }}>
-            Welcome back, {currentUser?.first_name}!
-          </h2>
-
-          <p style={{
-            color: 'hsl(var(--muted-foreground))',
-            fontSize: '1.25rem',
-            fontWeight: '500',
-            marginBottom: '2rem',
-            animation: 'textFadeIn 1s ease-out 0.5s both',
-            maxWidth: '400px',
-            margin: '0 auto 2rem',
-            lineHeight: '1.6'
-          }}>
-            Ready to make a difference today?
-          </p>
-
-          {/* Progress indicator */}
-          <div style={{
-            display: 'flex',
-            justifyContent: 'center',
-            gap: '0.5rem',
-            marginTop: '1rem'
-          }}>
-            {[...Array(3)].map((_, i) => (
-              <div
-                key={i}
-                style={{
-                  width: '8px',
-                  height: '8px',
-                  borderRadius: '50%',
-                  background: 'hsl(var(--primary))',
-                  animation: `progressDot 1.5s ease-in-out infinite`,
-                  animationDelay: `${i * 0.2}s`
-                }}
-              />
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <style>{`
-        @keyframes welcomeFadeOut {
-          0% { opacity: 1; transform: scale(1); }
-          90% { opacity: 1; transform: scale(1); }
-          100% { opacity: 0; transform: scale(1.05); visibility: hidden; }
-        }
-
-        @keyframes welcomeSlideIn {
-          0% { transform: translateY(50px) scale(0.8); opacity: 0; }
-          50% { transform: translateY(-10px) scale(1.05); opacity: 0.8; }
-          100% { transform: translateY(0) scale(1); opacity: 1; }
-        }
-
-        @keyframes iconPulse {
-          0%, 100% { transform: scale(1); box-shadow: 0 0 40px hsl(var(--primary) / 0.5), 0 0 80px hsl(var(--primary) / 0.3); }
-          50% { transform: scale(1.1); box-shadow: 0 0 60px hsl(var(--primary) / 0.7), 0 0 120px hsl(var(--primary) / 0.5); }
-        }
-
-        @keyframes iconBounce {
-          0% { transform: translateY(0); }
-          50% { transform: translateY(-10px); }
-          100% { transform: translateY(0); }
-        }
-
-        @keyframes checkmarkDraw {
-          0% { transform: scale(0) rotate(-180deg); opacity: 0; }
-          50% { transform: scale(1.2) rotate(-90deg); opacity: 0.7; }
-          100% { transform: scale(1) rotate(0deg); opacity: 1; }
-        }
-
-        @keyframes ringExpand {
-          0% { transform: scale(1); opacity: 0.8; }
-          100% { transform: scale(1.5); opacity: 0; }
-        }
-
-        @keyframes particleFloat {
-          0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.6; }
-          50% { transform: translateY(-20px) rotate(180deg); opacity: 0.3; }
-        }
-
-        @keyframes textGlow {
-          0% { filter: drop-shadow(0 0 5px hsl(var(--primary) / 0.3)); }
-          100% { filter: drop-shadow(0 0 15px hsl(var(--primary) / 0.6)); }
-        }
-
-        @keyframes textFadeIn {
-          0% { opacity: 0; transform: translateY(20px); }
-          100% { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes progressDot {
-          0%, 80%, 100% { transform: scale(1); opacity: 0.5; }
-          40% { transform: scale(1.5); opacity: 1; }
-        }
-      `}</style>
-
+    <div className="page-dashboard dashboard-layout min-h-screen bg-background">
+      {/* Mobile Hamburger Menu Button - Fixed at top left */}
       <button
-        className="mobile-menu-btn"
+        className="fixed top-4 left-4 z-50 md:hidden bg-primary text-primary-foreground p-2 rounded-lg shadow-lg hover:bg-primary/90 transition-all duration-300"
         onClick={() => setSidebarOpen(!sidebarOpen)}
+        aria-label="Toggle menu"
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '44px',
+          height: '44px',
+        }}
       >
         {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
 
-      <div
-        className={`mobile-overlay ${sidebarOpen ? "show" : ""}`}
-        onClick={() => setSidebarOpen(false)}
-      />
+      {/* Dark Overlay for Mobile */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 md:hidden transition-opacity duration-300"
+          onClick={() => setSidebarOpen(false)}
+          style={{ backdropFilter: 'blur(4px)' }}
+        />
+      )}
 
-      <aside className={`page-aside ${sidebarOpen ? "" : "mobile-hidden"}`}>
-        <div className="sidebar-brand">
-          <div className="brand-icon">
-            <Flag className="text-primary-foreground" size={20} />
+      {/* Sidebar - Slide in from left on mobile, fixed on desktop */}
+      <aside 
+        className={`fixed md:static top-0 left-0 h-full w-64 bg-card border-r border-border z-50 transform transition-transform duration-300 ease-in-out md:translate-x-0 ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+        style={{
+          paddingTop: '60px',
+        }}
+      >
+        <div className="p-4 border-b border-border">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
+              <Flag className="text-primary-foreground" size={20} />
+            </div>
+            <h1 className="text-xl font-bold">iReporter</h1>
           </div>
-          <h1 className="sidebar-title">iReporter</h1>
         </div>
 
-        <nav className="sidebar-nav" style={{ marginTop: "2rem" }}>
-          <Link to="/dashboard" className="nav-link nav-link-active">
+        <nav className="p-4 space-y-2">
+          <Link 
+            to="/dashboard" 
+            className="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary/10 text-primary font-medium transition-colors"
+            onClick={() => setSidebarOpen(false)}
+          >
             <Grid3x3 size={20} />
-            <span>My reports</span>
+            <span>Dashboard</span>
           </Link>
 
-          <Link to="/red-flags" className="nav-link">
+          <Link 
+            to="/create" 
+            className="flex items-center gap-3 px-4 py-3 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+            onClick={() => setSidebarOpen(false)}
+          >
+            <FilePlus size={20} />
+            <span>Create Red Flag</span>
+          </Link>
+
+          <Link 
+            to="/create" 
+            className="flex items-center gap-3 px-4 py-3 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+            onClick={() => setSidebarOpen(false)}
+          >
+            <AlertCircle size={20} />
+            <span>Create Intervention</span>
+          </Link>
+
+          <Link 
+            to="/red-flags" 
+            className="flex items-center gap-3 px-4 py-3 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+            onClick={() => setSidebarOpen(false)}
+          >
             <Flag size={20} />
-            <span>Red Flags</span>
+            <span>My Reports</span>
           </Link>
 
-          <Link to="/interventions" className="nav-link">
-            <Plus size={20} />
-            <span>Interventions</span>
-          </Link>
-
-          <button
-            onClick={handleLogout}
-            className="nav-link"
-            style={{ width: "100%", textAlign: "left" }}
+          <Link 
+            to="/" 
+            className="flex items-center gap-3 px-4 py-3 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+            onClick={() => {
+              setSidebarOpen(false);
+              handleLogout();
+            }}
           >
             <LogOut size={20} />
             <span>Logout</span>
-          </button>
+          </Link>
         </nav>
 
-        <div
-          style={{
-            marginTop: "auto",
-            padding: "1rem",
-            borderTop: "1px solid hsl(var(--border))",
-          }}
-        >
-          {/* User Profile Section */}
+        {/* User Profile Section */}
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border bg-card">
           {currentUser && (
-            <div style={{ marginBottom: "1rem" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-                <div
-                  className="brand-icon"
-                  style={{
-                    width: "2.5rem",
-                    height: "2.5rem",
-                    borderRadius: "50%",
-                    overflow: "hidden",
-                    border: "2px solid hsl(var(--border))",
-                  }}
-                >
-                  {currentUser.profile_picture ? (
-                    <img
-                      src={`${(import.meta.env.VITE_API_URL || "http://localhost:3000").replace('/api', '')}${currentUser.profile_picture}`}
-                      alt="Profile"
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                      }}
-                    />
-                  ) : (
-                    <div
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        background: "hsl(var(--primary))",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        color: "hsl(var(--primary-foreground))",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      {`${currentUser.first_name?.[0] || ""}${currentUser.last_name?.[0] || ""}`}
-                    </div>
-                  )}
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div
-                    style={{
-                      fontSize: "0.875rem",
-                      fontWeight: "500",
-                      color: "hsl(var(--foreground))",
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
-                    {`${currentUser.first_name} ${currentUser.last_name}`}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: "0.75rem",
-                      color: "hsl(var(--muted-foreground))",
-                    }}
-                  >
-                    Citizen Reporter
-                  </div>
-                </div>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-sm">
+                {`${currentUser.first_name?.[0] || ""}${currentUser.last_name?.[0] || ""}`}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-sm truncate">{`${currentUser.first_name} ${currentUser.last_name}`}</p>
+                <p className="text-xs text-muted-foreground">Citizen Reporter</p>
               </div>
             </div>
           )}
-
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-            <span style={{ fontSize: "0.875rem" }}>Theme</span>
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">Theme</span>
             <ThemeToggle />
           </div>
         </div>
       </aside>
 
-      <main className="main-content">
-        <div className="page-header">
+      {/* Main Content */}
+      <main className="flex-1 p-4 md:p-8 pt-20 md:pt-8 overflow-x-hidden">
+        {/* Page Header */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div>
-            <div className="page-subtitle">
+            <div className="flex items-center gap-2 text-muted-foreground mb-1">
               <Grid3x3 size={20} />
               <span>Overview</span>
             </div>
-            <h2 className="text-2xl font-semibold">My Reports</h2>
+            <h2 className="text-2xl font-semibold">My Dashboard</h2>
           </div>
 
           <div className="flex items-center gap-3">
             <NotificationBell />
-            <span>
-              {currentUser?.first_name} {currentUser?.last_name}
-            </span>
-            <button
-              onClick={handleEditProfile}
-              style={{
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                color: "hsl(var(--muted-foreground))",
-                padding: "0.25rem",
-                borderRadius: "0.25rem",
-              }}
-              title="Edit Profile"
-            >
-              <Edit size={16} />
-            </button>
-            <div
-              className="brand-icon"
-              style={{ width: "2.5rem", height: "2.5rem", overflow: "hidden", borderRadius: "50%" }}
-            >
-              {currentUser?.profile_picture ? (
-                <img
-                  src={`${(import.meta.env.VITE_API_URL || "http://localhost:3000").replace('/api', '')}${currentUser.profile_picture}`}
-                  alt="Profile"
-                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                  onError={(e) => {
-                    // Hide broken image and show fallback
-                    e.currentTarget.style.display = 'none';
-                    const fallback = e.currentTarget.nextElementSibling as HTMLElement;
-                    if (fallback) fallback.style.display = 'flex';
-                  }}
-                />
-              ) : null}
-              <span
-                style={{
-                  display: currentUser?.profile_picture ? 'none' : 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: '100%',
-                  height: '100%',
-                  background: 'hsl(var(--muted))',
-                  color: 'hsl(var(--muted-foreground))',
-                  fontSize: '0.875rem',
-                  fontWeight: '500'
-                }}
+            <div className="flex items-center gap-2">
+              <span className="text-sm hidden sm:inline">{currentUser?.first_name} {currentUser?.last_name}</span>
+              <button
+                onClick={handleEditProfile}
+                className="p-1 rounded hover:bg-muted transition-colors"
+                title="Edit Profile"
               >
-                {`${currentUser?.first_name?.[0] || ""}${
-                  currentUser?.last_name?.[0] || ""
-                }`}
-              </span>
-            </div>
-          </div>
-
-          {showProfileModal && (
-            <div
-              className="profile-edit-modal"
-              style={{
-                position: "fixed",
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                background: "rgba(0,0,0,0.5)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                zIndex: 1000,
-              }}
-            >
-              <div
-                className="profile-edit-content"
-                style={{
-                  background: "hsl(var(--background))",
-                  padding: "2rem",
-                  borderRadius: "0.5rem",
-                  boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
-                  maxWidth: "400px",
-                  width: "100%",
-                  margin: "1rem",
-                }}
-              >
-                <h3
-                  style={{
-                    marginBottom: "1.5rem",
-                    fontSize: "1.25rem",
-                    fontWeight: "600",
-                    color: "hsl(var(--foreground))",
-                  }}
-                >
-                  Edit Profile
-                </h3>
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "1rem",
-                  }}
-                >
-                  <div>
-                    <label
-                      style={{
-                        display: "block",
-                        marginBottom: "0.5rem",
-                        fontSize: "0.875rem",
-                        fontWeight: "500",
-                        color: "hsl(var(--primary))",
-                      }}
-                    >
-                      First Name
-                    </label>
-                    <input
-                      type="text"
-                      value={profileData.first_name}
-                      onChange={(e) =>
-                        setProfileData({
-                          ...profileData,
-                          first_name: e.target.value,
-                        })
-                      }
-                      style={{
-                        width: "100%",
-                        padding: "0.75rem",
-                        border: "1px solid hsl(var(--border))",
-                        borderRadius: "0.375rem",
-                        background: "hsl(var(--background))",
-                        color: "hsl(var(--foreground))",
-                        fontSize: "0.875rem",
-                      }}
-                      placeholder="Enter first name"
-                    />
-                  </div>
-                  <div>
-                    <label
-                      style={{
-                        display: "block",
-                        marginBottom: "0.5rem",
-                        fontSize: "0.875rem",
-                        fontWeight: "500",
-                        color: "hsl(var(--primary))",
-                      }}
-                    >
-                      Last Name
-                    </label>
-                    <input
-                      type="text"
-                      value={profileData.last_name}
-                      onChange={(e) =>
-                        setProfileData({
-                          ...profileData,
-                          last_name: e.target.value,
-                        })
-                      }
-                      style={{
-                        width: "100%",
-                        padding: "0.75rem",
-                        border: "1px solid hsl(var(--border))",
-                        borderRadius: "0.375rem",
-                        background: "hsl(var(--background))",
-                        color: "hsl(var(--foreground))",
-                        fontSize: "0.875rem",
-                      }}
-                      placeholder="Enter last name"
-                    />
-                  </div>
-                  <div>
-                    <label
-                      style={{
-                        display: "block",
-                        marginBottom: "0.5rem",
-                        fontSize: "0.875rem",
-                        fontWeight: "500",
-                        color: "hsl(var(--primary))",
-                      }}
-                    >
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      value={profileData.email}
-                      onChange={(e) =>
-                        setProfileData({
-                          ...profileData,
-                          email: e.target.value,
-                        })
-                      }
-                      style={{
-                        width: "100%",
-                        padding: "0.75rem",
-                        border: "1px solid hsl(var(--border))",
-                        borderRadius: "0.375rem",
-                        background: "hsl(var(--background))",
-                        color: "hsl(var(--foreground))",
-                        fontSize: "0.875rem",
-                      }}
-                      placeholder="Enter email"
-                    />
-                  </div>
-                  <div>
-                    <label
-                      style={{
-                        display: "block",
-                        marginBottom: "0.5rem",
-                        fontSize: "0.875rem",
-                        fontWeight: "500",
-                        color: "hsl(var(--primary))",
-                      }}
-                    >
-                      Profile Picture
-                    </label>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          setProfilePictureFile(file);
-                        }
-                      }}
-                      style={{
-                        width: "100%",
-                        padding: "0.75rem",
-                        border: "1px solid hsl(var(--border))",
-                        borderRadius: "0.375rem",
-                        background: "hsl(var(--background))",
-                        color: "hsl(var(--foreground))",
-                        fontSize: "0.875rem",
-                      }}
-                    />
-                    {profilePictureFile && (
-                      <div style={{ marginTop: "0.5rem" }}>
-                        <p style={{ fontSize: "0.75rem", marginBottom: "0.25rem", color: "hsl(var(--muted-foreground))" }}>
-                          Selected: {profilePictureFile.name}
-                        </p>
-                        <img
-                          src={URL.createObjectURL(profilePictureFile)}
-                          alt="Profile preview"
-                          style={{
-                            width: "80px",
-                            height: "80px",
-                            objectFit: "cover",
-                            borderRadius: "50%",
-                            border: "2px solid hsl(var(--border))"
-                          }}
-                        />
-                      </div>
-                    )}
-                  </div>
-                </div>
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "flex-end",
-                    gap: "0.75rem",
-                    marginTop: "1.5rem",
-                  }}
-                >
-                  <button
-                    onClick={handleCancelEdit}
-                    style={{
-                      padding: "0.5rem 1rem",
-                      background: "hsl(var(--muted))",
-                      color: "hsl(var(--muted-foreground))",
-                      border: "none",
-                      borderRadius: "0.375rem",
-                      cursor: "pointer",
-                      fontSize: "0.875rem",
-                    }}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleSaveProfile}
-                    style={{
-                      padding: "0.5rem 1rem",
-                      background: "hsl(var(--primary))",
-                      color: "hsl(var(--primary-foreground))",
-                      border: "none",
-                      borderRadius: "0.375rem",
-                      cursor: "pointer",
-                      fontSize: "0.875rem",
-                    }}
-                    disabled={loading}
-                  >
-                    {loading ? "Saving..." : "Save Changes"}
-                  </button>
-                </div>
+                <Edit size={16} className="text-muted-foreground" />
+              </button>
+              <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-sm">
+                {`${currentUser?.first_name?.[0] || ""}${currentUser?.last_name?.[0] || ""}`}
               </div>
             </div>
-          )}
+          </div>
         </div>
 
-        <div className="cards-grid" style={{ marginBottom: "2rem" }}>
-          <div className="stat-card">
-            <div
-              className="stat-value"
-              style={{ color: "hsl(var(--primary))" }}
-            >
-              {stats.total}
-            </div>
-            <div className="stat-label">Total Reports</div>
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+          <div className="bg-card border border-border rounded-xl p-6 text-center">
+            <div className="text-3xl font-bold text-primary mb-2">{stats.total}</div>
+            <div className="text-sm text-muted-foreground">Total Reports</div>
           </div>
 
-          <div className="stat-card">
-            <div
-              className="stat-value"
-              style={{ color: "hsl(var(--destructive))" }}
-            >
-              {stats.redFlags}
-            </div>
-            <div className="stat-label">Red Flags</div>
+          <div className="bg-card border border-border rounded-xl p-6 text-center">
+            <div className="text-3xl font-bold text-destructive mb-2">{stats.redFlags}</div>
+            <div className="text-sm text-muted-foreground">Red Flags</div>
           </div>
 
-          <div className="stat-card">
-            <div
-              className="stat-value"
-              style={{ color: "hsl(var(--chart-2))" }}
-            >
-              {stats.interventions}
-            </div>
-            <div className="stat-label">Interventions</div>
+          <div className="bg-card border border-border rounded-xl p-6 text-center">
+            <div className="text-3xl font-bold text-chart-2 mb-2">{stats.interventions}</div>
+            <div className="text-sm text-muted-foreground">Interventions</div>
           </div>
+        </div>
+
+        {/* Quick Actions - Mobile Friendly */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+          <Link
+            to="/create"
+            className="flex items-center justify-center gap-2 p-4 bg-primary text-primary-foreground rounded-xl font-medium hover:bg-primary/90 transition-colors"
+          >
+            <Plus size={20} />
+            <span>Create Red Flag</span>
+          </Link>
+          <Link
+            to="/create"
+            className="flex items-center justify-center gap-2 p-4 bg-secondary text-secondary-foreground rounded-xl font-medium hover:bg-secondary/80 transition-colors"
+          >
+            <AlertCircle size={20} />
+            <span>Create Intervention</span>
+          </Link>
         </div>
 
         {/* Charts Section */}
-        <div style={{ marginBottom: "2rem" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-            <h3 style={{ fontSize: "1.25rem", fontWeight: "600", color: "hsl(var(--foreground))" }}>
-              Analytics Overview
-            </h3>
-            <div style={{ display: "flex", gap: "0.5rem" }}>
-              <button
-                onClick={loadStats}
-                style={{
-                  padding: "0.5rem 1rem",
-                  background: "hsl(var(--primary))",
-                  color: "hsl(var(--primary-foreground))",
-                  border: "none",
-                  borderRadius: "0.375rem",
-                  cursor: "pointer",
-                  fontSize: "0.875rem",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.25rem"
-                }}
-              >
-                🔄 Refresh
-              </button>
-              {currentUser?.is_admin && (
-                <button
-                  onClick={loadUsers}
-                  disabled={loadingUsers}
-                  style={{
-                    padding: "0.5rem 1rem",
-                    background: "hsl(var(--destructive))",
-                    color: "hsl(var(--destructive-foreground))",
-                    border: "none",
-                    borderRadius: "0.375rem",
-                    cursor: loadingUsers ? "not-allowed" : "pointer",
-                    fontSize: "0.875rem",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "0.25rem",
-                    opacity: loadingUsers ? 0.6 : 1
-                  }}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {/* Report Type Distribution */}
+          <div className="bg-card border border-border rounded-xl p-6">
+            <h3 className="text-lg font-semibold mb-4">Report types</h3>
+            <ResponsiveContainer width="100%" height={280}>
+              <PieChart>
+                <Pie
+                  data={chartData.typeDistribution}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={40}
+                  outerRadius={90}
+                  paddingAngle={2}
+                  dataKey="value"
                 >
-                  👥 {loadingUsers ? "Loading..." : "Load Users"}
-                </button>
-              )}
-            </div>
-          </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(400px, 1fr))", gap: "1.5rem" }}>
-            {/* Report Type Distribution Pie Chart */}
-            <div
-              className="stat-card"
-              style={{
-                padding: "1.5rem",
-                background: "hsl(var(--card))",
-                border: "1px solid hsl(var(--border))",
-                borderRadius: "0.75rem",
-                boxShadow: "0 4px 6px rgba(0,0,0,0.07)",
-                transition: "transform 0.2s ease, box-shadow 0.2s ease",
-                cursor: "pointer"
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = "translateY(-2px)";
-                e.currentTarget.style.boxShadow = "0 8px 25px rgba(0,0,0,0.15)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.boxShadow = "0 4px 6px rgba(0,0,0,0.07)";
-              }}
-            >
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-                <h4 style={{ fontSize: "1rem", fontWeight: "600", color: "hsl(var(--foreground))" }}>
-                  Report Types
-                </h4>
-                <div style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))" }}>
-                  {stats.total} total
-                </div>
-              </div>
-              <ResponsiveContainer width="100%" height={280}>
-                <PieChart>
-                  <Pie
-                    data={chartData.typeDistribution}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={40}
-                    outerRadius={90}
-                    paddingAngle={2}
-                    dataKey="value"
-                    animationBegin={0}
-                    animationDuration={1000}
-                  >
-                    {chartData.typeDistribution.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={entry.color}
-                        stroke={entry.color}
-                        strokeWidth={2}
-                      />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    contentStyle={{
-                      background: "hsl(var(--popover))",
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: "0.5rem",
-                      color: "hsl(var(--popover-foreground))"
-                    }}
-                    formatter={(value: number, name: string) => [
-                      `${value} reports (${((value / stats.total) * 100).toFixed(1)}%)`,
-                      name
-                    ]}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-              <div style={{ display: "flex", justifyContent: "center", gap: "1rem", marginTop: "1rem" }}>
-                {chartData.typeDistribution.map((item, index) => (
-                  <div key={index} style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}>
-                    <div
-                      style={{
-                        width: "12px",
-                        height: "12px",
-                        borderRadius: "50%",
-                        background: item.color
-                      }}
-                    />
-                    <span style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))" }}>
-                      {item.name}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Status Distribution Pie Chart */}
-            <div
-              className="stat-card"
-              style={{
-                padding: "1.5rem",
-                background: "hsl(var(--card))",
-                border: "1px solid hsl(var(--border))",
-                borderRadius: "0.75rem",
-                boxShadow: "0 4px 6px rgba(0,0,0,0.07)",
-                transition: "transform 0.2s ease, box-shadow 0.2s ease",
-                cursor: "pointer"
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = "translateY(-2px)";
-                e.currentTarget.style.boxShadow = "0 8px 25px rgba(0,0,0,0.15)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.boxShadow = "0 4px 6px rgba(0,0,0,0.07)";
-              }}
-            >
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-                <h4 style={{ fontSize: "1rem", fontWeight: "600", color: "hsl(var(--foreground))" }}>
-                  Report Status
-                </h4>
-                <div style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))" }}>
-                  {stats.total} total
-                </div>
-              </div>
-              <ResponsiveContainer width="100%" height={280}>
-                <PieChart>
-                  <Pie
-                    data={chartData.statusDistribution}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={40}
-                    outerRadius={90}
-                    paddingAngle={2}
-                    dataKey="value"
-                    animationBegin={200}
-                    animationDuration={1000}
-                  >
-                    {chartData.statusDistribution.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={entry.color}
-                        stroke={entry.color}
-                        strokeWidth={2}
-                      />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    contentStyle={{
-                      background: "hsl(var(--popover))",
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: "0.5rem",
-                      color: "hsl(var(--popover-foreground))"
-                    }}
-                    formatter={(value: number, name: string) => [
-                      `${value} reports (${stats.total > 0 ? ((value / stats.total) * 100).toFixed(1) : 0}%)`,
-                      name
-                    ]}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-              <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "0.75rem", marginTop: "1rem" }}>
-                {chartData.statusDistribution.map((item, index) => (
-                  <div key={index} style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}>
-                    <div
-                      style={{
-                        width: "10px",
-                        height: "10px",
-                        borderRadius: "50%",
-                        background: item.color
-                      }}
-                    />
-                    <span style={{ fontSize: "0.7rem", color: "hsl(var(--muted-foreground))" }}>
-                      {item.name}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Monthly Trend Bar Chart */}
-            <div
-              className="stat-card"
-              style={{
-                padding: "1.5rem",
-                background: "hsl(var(--card))",
-                border: "1px solid hsl(var(--border))",
-                borderRadius: "0.75rem",
-                boxShadow: "0 4px 6px rgba(0,0,0,0.07)",
-                gridColumn: "1 / -1",
-                transition: "transform 0.2s ease, box-shadow 0.2s ease"
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = "translateY(-2px)";
-                e.currentTarget.style.boxShadow = "0 8px 25px rgba(0,0,0,0.15)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.boxShadow = "0 4px 6px rgba(0,0,0,0.07)";
-              }}
-            >
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-                <h4 style={{ fontSize: "1rem", fontWeight: "600", color: "hsl(var(--foreground))" }}>
-                  Monthly Report Trends
-                </h4>
-                <div style={{ fontSize: "0.75rem", color: "hsl(var(--muted-foreground))" }}>
-                  Last 6 months
-                </div>
-              </div>
-              <ResponsiveContainer width="100%" height={320}>
-                <BarChart
-                  data={chartData.monthlyData}
-                  margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
-                  <XAxis
-                    dataKey="month"
-                    stroke="hsl(var(--muted-foreground))"
-                    fontSize={12}
-                  />
-                  <YAxis
-                    stroke="hsl(var(--muted-foreground))"
-                    fontSize={12}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      background: "hsl(var(--popover))",
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: "0.5rem",
-                      color: "hsl(var(--popover-foreground))"
-                    }}
-                    formatter={(value: number, name: string) => [
-                      `${value} ${name.toLowerCase()}`,
-                      name
-                    ]}
-                  />
-                  <Legend
-                    wrapperStyle={{ paddingTop: "1rem" }}
-                  />
-                  <Bar
-                    dataKey="redFlags"
-                    fill="hsl(var(--destructive))"
-                    name="Red Flags"
-                    radius={[4, 4, 0, 0]}
-                
-                
-                    animationBegin={400}
-                    animationDuration={1200}
-                  />
-                  <Bar
-                    dataKey="interventions"
-                    fill="hsl(var(--chart-2))"
-                    name="Interventions"
-                    radius={[4, 4, 0, 0]}
-                    animationBegin={600}
-                    animationDuration={1200}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          {/* Report History Section */}
-          <div style={{ marginTop: "2rem" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-              <h3 style={{ fontSize: "1.25rem", fontWeight: "600", color: "hsl(var(--foreground))" }}>
-                Report History
-                
-              </h3>
-              <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-                <input
-                  type="text"
-                  placeholder="Search reports..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  style={{
-                    padding: "0.5rem 1rem",
-                    border: "1px solid hsl(var(--border))",
-                    borderRadius: "0.375rem",
-                    background: "hsl(var(--background))",
-                    color: "hsl(var(--foreground))",
-                    fontSize: "0.875rem",
-                    width: "200px"
-                  }}
-                />
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  style={{
-                    padding: "0.5rem 1rem",
-                    border: "1px solid hsl(var(--border))",
-                    borderRadius: "0.375rem",
-                    background: "hsl(var(--background))",
-                    color: "hsl(var(--foreground))",
-                    fontSize: "0.875rem"
-                  }}
-                >
-                  <option value="all">All Status</option>
-                  <option value="draft">Draft</option>
-                  <option value="underinvestigation">Under Investigation</option>
-                  <option value="resolved">Resolved</option>
-                  <option value="rejected">Rejected</option>
-                </select>
-                <select
-                  value={typeFilter}
-                  onChange={(e) => setTypeFilter(e.target.value)}
-                  style={{
-                    padding: "0.5rem 1rem",
-                    border: "1px solid hsl(var(--border))",
-                    borderRadius: "0.375rem",
-                    background: "hsl(var(--background))",
-                    color: "hsl(var(--foreground))",
-                    fontSize: "0.875rem"
-                  }}
-                >
-                  <option value="all">All Types</option>
-                  <option value="red-flag">Red Flags</option>
-                  <option value="intervention">Interventions</option>
-                </select>
-              </div>
-            </div>
-
-            <div style={{
-              background: "hsl(var(--card))",
-              border: "1px solid hsl(var(--border))",
-              borderRadius: "0.75rem",
-              overflow: "hidden"
-            }}>
-              {filteredReports.length === 0 ? (
-                <div style={{
-                  padding: "2rem",
-                  textAlign: "center",
-                  color: "hsl(var(--muted-foreground))"
-                }}>
-                  {userReports.length === 0 ? "No reports found. Create your first report!" : "No reports match your filters."}
-                </div>
-              ) : (
-                <div style={{ maxHeight: "400px", overflowY: "auto" }}>
-                  {filteredReports.map((report, index) => (
-                    <div
-                      key={report.id || index}
-                      style={{
-                        padding: "1rem",
-                        borderBottom: index < filteredReports.length - 1 ? "1px solid hsl(var(--border))" : "none",
-                        cursor: "pointer",
-                        transition: "background-color 0.2s ease"
-                      }}
-                      onClick={() => handleViewReportDetails(report)}
-                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "hsl(var(--muted) / 0.5)"}
-                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
-                    >
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                        <div style={{ flex: 1 }}>
-                          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.25rem" }}>
-                            <span style={{
-                              fontSize: "0.75rem",
-                              fontWeight: "500",
-                              color: report.reportType === 'red-flag' ? 'hsl(var(--destructive))' : 'hsl(var(--chart-2))',
-                              textTransform: "uppercase",
-                              letterSpacing: "0.05em"
-                            }}>
-                              {report.reportType === 'red-flag' ? 'Red Flag' : 'Intervention'}
-                            </span>
-                            <span style={{
-                              fontSize: "0.75rem",
-                              padding: "0.125rem 0.5rem",
-                              borderRadius: "0.25rem",
-                              backgroundColor: getStatusColor(report.status),
-                              color: "white",
-                              fontWeight: "500"
-                            }}>
-                              {getStatusBadge(report.status)}
-                            </span>
-                          </div>
-                          <h4 style={{
-                            fontSize: "1rem",
-                            fontWeight: "600",
-                            color: "hsl(var(--foreground))",
-                            marginBottom: "0.25rem"
-                          }}>
-                            {report.title || 'Untitled Report'}
-                          </h4>
-                          <p style={{
-                            fontSize: "0.875rem",
-                            color: "hsl(var(--muted-foreground))",
-                            marginBottom: "0.5rem",
-                            display: "-webkit-box",
-                            WebkitLineClamp: 2,
-                            WebkitBoxOrient: "vertical",
-                            overflow: "hidden"
-                          }}>
-                            {report.description || 'No description provided'}
-                          </p>
-                          <div style={{ display: "flex", alignItems: "center", gap: "1rem", fontSize: "0.75rem", color: "hsl(var(--muted-foreground))" }}>
-                            <span>📍 {report.location || 'Location not specified'}</span>
-                            <span>📅 {report.created_at ? new Date(report.created_at).toLocaleDateString() : 'Date unknown'}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                  {chartData.typeDistribution.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="flex justify-center gap-4 mt-4">
+              {chartData.typeDistribution.map((item, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full" style={{ background: item.color }} />
+                  <span className="text-sm text-muted-foreground">{item.name}</span>
                 </div>
-              )}
+              ))}
             </div>
           </div>
 
-          {/* User Settings Section */}
-          <div style={{ marginTop: "2rem" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-              <h3 style={{ fontSize: "1.25rem", fontWeight: "600", color: "hsl(var(--foreground))" }}>
-                Account Settings
-              </h3>
-              <button
-                onClick={handleSaveSettings}
-                style={{
-                  padding: "0.5rem 1rem",
-                  background: "hsl(var(--primary))",
-                  color: "hsl(var(--primary-foreground))",
-                  border: "none",
-                  borderRadius: "0.375rem",
-                  cursor: "pointer",
-                  fontSize: "0.875rem",
-                  fontWeight: "500"
-                }}
+          {/* Status Distribution */}
+          <div className="bg-card border border-border rounded-xl p-6">
+            <h3 className="text-lg font-semibold mb-4">Report Status</h3>
+            <ResponsiveContainer width="100%" height={280}>
+              <PieChart>
+                <Pie
+                  data={chartData.statusDistribution}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={40}
+                  outerRadius={90}
+                  paddingAngle={2}
+                  dataKey="value"
+                >
+                  {chartData.statusDistribution.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="flex flex-wrap justify-center gap-3 mt-4">
+              {chartData.statusDistribution.map((item, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full" style={{ background: item.color }} />
+                  <span className="text-sm text-muted-foreground">{item.name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Monthly Trends */}
+        <div className="bg-card border border-border rounded-xl p-6 mb-8">
+          <h3 className="text-lg font-semibold mb-4">Monthly Trends</h3>
+          <ResponsiveContainer width="100%" height={320}>
+            <BarChart data={chartData.monthlyData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="month" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Bar dataKey="redFlags" fill="hsl(var(--destructive))" name="Red Flags" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="interventions" fill="hsl(var(--chart-2))" name="Interventions" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Recent Reports */}
+        <div className="bg-card border border-border rounded-xl p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <h3 className="text-lg font-semibold">Recent Reports</h3>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <input
+                type="text"
+                placeholder="Search..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="px-4 py-2 rounded-lg border border-input bg-background text-sm"
+              />
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="px-4 py-2 rounded-lg border border-input bg-background text-sm"
               >
-                Save Settings
-              </button>
-            </div>
-
-            <div style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-              gap: "1rem"
-            }}>
-              <div style={{
-                padding: "1.5rem",
-                background: "hsl(var(--card))",
-                border: "1px solid hsl(var(--border))",
-                borderRadius: "0.75rem"
-              }}>
-                <h4 style={{ fontSize: "1rem", fontWeight: "600", color: "hsl(var(--foreground))", marginBottom: "1rem" }}>
-                  Notifications
-                </h4>
-                <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-                  <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer" }}>
-                    <input
-                      type="checkbox"
-                      checked={userSettings.emailNotifications}
-                      onChange={(e) => setUserSettings({...userSettings, emailNotifications: e.target.checked})}
-                      style={{ width: "1rem", height: "1rem" }}
-                    />
-                    <span style={{ fontSize: "0.875rem", color: "hsl(var(--foreground))" }}>
-                      Email notifications for status updates
-                    </span>
-                  </label>
-                  <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer" }}>
-                    <input
-                      type="checkbox"
-                      checked={userSettings.smsNotifications}
-                      onChange={(e) => setUserSettings({...userSettings, smsNotifications: e.target.checked})}
-                      style={{ width: "1rem", height: "1rem" }}
-                    />
-                    <span style={{ fontSize: "0.875rem", color: "hsl(var(--foreground))" }}>
-                      SMS notifications for critical updates
-                    </span>
-                  </label>
-                </div>
-              </div>
-
-              <div style={{
-                padding: "1.5rem",
-                background: "hsl(var(--card))",
-                border: "1px solid hsl(var(--border))",
-                borderRadius: "0.75rem"
-              }}>
-                <h4 style={{ fontSize: "1rem", fontWeight: "600", color: "hsl(var(--foreground))", marginBottom: "1rem" }}>
-                  Preferences
-                </h4>
-                <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-                  <div>
-                    <label style={{ display: "block", fontSize: "0.875rem", color: "hsl(var(--foreground))", marginBottom: "0.5rem" }}>
-                      Theme
-                    </label>
-                    <select
-                      value={userSettings.theme}
-                      onChange={(e) => setUserSettings({...userSettings, theme: e.target.value})}
-                      style={{
-                        width: "100%",
-                        padding: "0.5rem",
-                        border: "1px solid hsl(var(--border))",
-                        borderRadius: "0.375rem",
-                        background: "hsl(var(--background))",
-                        color: "hsl(var(--foreground))",
-                        fontSize: "0.875rem"
-                      }}
-                    >
-                      <option value="light">Light</option>
-                      <option value="dark">Dark</option>
-                      <option value="auto">Auto</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label style={{ display: "block", fontSize: "0.875rem", color: "hsl(var(--foreground))", marginBottom: "0.5rem" }}>
-                      Language
-                    </label>
-                    <select
-                      value={userSettings.language}
-                      onChange={(e) => setUserSettings({...userSettings, language: e.target.value})}
-                      style={{
-                        width: "100%",
-                        padding: "0.5rem",
-                        border: "1px solid hsl(var(--border))",
-                        borderRadius: "0.375rem",
-                        background: "hsl(var(--background))",
-                        color: "hsl(var(--foreground))",
-                        fontSize: "0.875rem"
-                      }}
-                    >
-                      <option value="en">English</option>
-                      <option value="es">Español</option>
-                      <option value="fr">Français</option>
-                      <option value="sw">Kiswahili</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
+                <option value="all">All Status</option>
+                <option value="draft">Draft</option>
+                <option value="underinvestigation">Under Investigation</option>
+                <option value="resolved">Resolved</option>
+                <option value="rejected">Rejected</option>
+              </select>
             </div>
           </div>
 
-          {/* Summary Stats Row */}
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-            gap: "1rem",
-            marginTop: "1.5rem"
-          }}>
-            <div style={{
-              padding: "1rem",
-              background: "hsl(var(--card))",
-              border: "1px solid hsl(var(--border))",
-              borderRadius: "0.5rem",
-              textAlign: "center"
-            }}>
-              <div style={{ fontSize: "1.5rem", fontWeight: "bold", color: "hsl(var(--primary))" }}>
-                {stats.draft}
-              </div>
-              <div style={{ fontSize: "0.875rem", color: "hsl(var(--muted-foreground))" }}>
-                Draft Reports
-              </div>
+          {filteredReports.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              {userReports.length === 0 ? "No reports yet. Create your first report!" : "No reports match your filters."}
             </div>
-            <div style={{
-              padding: "1rem",
-              background: "hsl(var(--card))",
-              border: "1px solid hsl(var(--border))",
-              borderRadius: "0.5rem",
-              textAlign: "center"
-            }}>
-              <div style={{ fontSize: "1.5rem", fontWeight: "bold", color: "hsl(var(--chart-2))" }}>
-                {stats.underInvestigation}
-              </div>
-              <div style={{ fontSize: "0.875rem", color: "hsl(var(--muted-foreground))" }}>
-                Under Investigation
-              </div>
+          ) : (
+            <div className="space-y-4">
+              {filteredReports.slice(0, 10).map((report, index) => (
+                <div
+                  key={report.id || index}
+                  className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors cursor-pointer"
+                  onClick={() => handleViewReportDetails(report)}
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className={`text-xs font-medium px-2 py-0.5 rounded ${
+                        report.reportType === 'red-flag' 
+                          ? 'bg-destructive/10 text-destructive' 
+                          : 'bg-chart-2/10 text-chart-2'
+                      }`}>
+                        {report.reportType === 'red-flag' ? 'Red Flag' : 'Intervention'}
+                      </span>
+                      <span 
+                        className="text-xs px-2 py-0.5 rounded text-white"
+                        style={{ background: getStatusColor(report.status) }}
+                      >
+                        {getStatusBadge(report.status)}
+                      </span>
+                    </div>
+                    <h4 className="font-medium truncate">{report.title || 'Untitled Report'}</h4>
+                    <p className="text-sm text-muted-foreground truncate">{report.description || 'No description'}</p>
+                  </div>
+                  <div className="flex items-center gap-4 mt-2 sm:mt-0 text-sm text-muted-foreground">
+                    <span>📍 {report.location || 'N/A'}</span>
+                    <span>📅 {report.created_at ? new Date(report.created_at).toLocaleDateString() : 'N/A'}</span>
+                  </div>
+                </div>
+              ))}
             </div>
-            <div style={{
-              padding: "1rem",
-              background: "hsl(var(--card))",
-              border: "1px solid hsl(var(--border))",
-              borderRadius: "0.5rem",
-              textAlign: "center"
-            }}>
-              <div style={{ fontSize: "1.5rem", fontWeight: "bold", color: "hsl(var(--chart-3))" }}>
-                {stats.resolved}
-              </div>
-              <div style={{ fontSize: "0.875rem", color: "hsl(var(--muted-foreground))" }}>
-                Resolved
-              </div>
-            </div>
-            <div style={{
-              padding: "1rem",
-              background: "hsl(var(--card))",
-              border: "1px solid hsl(var(--border))",
-              borderRadius: "0.5rem",
-              textAlign: "center"
-            }}>
-              <div style={{ fontSize: "1.5rem", fontWeight: "bold", color: "hsl(var(--destructive))" }}>
-                {stats.rejected}
-              </div>
-              <div style={{ fontSize: "0.875rem", color: "hsl(var(--muted-foreground))" }}>
-                Rejected
-              </div>
-            </div>
-          </div>
+          )}
         </div>
       </main>
-
-      {/* Report Details Modal */}
-      {showReportDetails && selectedReport && (
-        <div
-          className="report-details-modal"
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: "rgba(0,0,0,0.5)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 1000,
-          }}
-        >
-          <div
-            className="report-details-content"
-            style={{
-              background: "hsl(var(--background))",
-              padding: "2rem",
-              borderRadius: "0.5rem",
-              boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
-              maxWidth: "600px",
-              width: "100%",
-              margin: "1rem",
-              maxHeight: "80vh",
-              overflowY: "auto",
-            }}
-          >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "1.5rem" }}>
-              <h3 style={{ fontSize: "1.25rem", fontWeight: "600", color: "hsl(var(--foreground))" }}>
-                Report Details
-              </h3>
-              <button
-                onClick={handleCloseReportDetails}
-                style={{
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  fontSize: "1.5rem",
-                  color: "hsl(var(--muted-foreground))",
-                  padding: "0.25rem",
-                }}
-              >
-                ×
-              </button>
-            </div>
-
-            <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem" }}>
-                <span style={{
-                  fontSize: "0.75rem",
-                  fontWeight: "500",
-                  color: selectedReport.reportType === 'red-flag' ? 'hsl(var(--destructive))' : 'hsl(var(--chart-2))',
-                  textTransform: "uppercase",
-                  letterSpacing: "0.05em"
-                }}>
-                  {selectedReport.reportType === 'red-flag' ? 'Red Flag' : 'Intervention'}
-                </span>
-                <span style={{
-                  fontSize: "0.75rem",
-                  padding: "0.125rem 0.5rem",
-                  borderRadius: "0.25rem",
-                  backgroundColor: getStatusColor(selectedReport.status),
-                  color: "white",
-                  fontWeight: "500"
-                }}>
-                  {getStatusBadge(selectedReport.status)}
-                </span>
-              </div>
-
-              <div>
-                <h4 style={{ fontSize: "1.125rem", fontWeight: "600", color: "hsl(var(--foreground))", marginBottom: "0.5rem" }}>
-                  {selectedReport.title || 'Untitled Report'}
-                </h4>
-                <p style={{ color: "hsl(var(--muted-foreground))", lineHeight: "1.5" }}>
-                  {selectedReport.description || 'No description provided'}
-                </p>
-              </div>
-
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
-                <div>
-                  <label style={{ fontSize: "0.875rem", fontWeight: "500", color: "hsl(var(--primary))", display: "block", marginBottom: "0.25rem" }}>
-                    Location
-                  </label>
-                  <p style={{ color: "hsl(var(--foreground))" }}>
-                    📍 {selectedReport.location || 'Location not specified'}
-                  </p>
-                </div>
-                <div>
-                  <label style={{ fontSize: "0.875rem", fontWeight: "500", color: "hsl(var(--primary))", display: "block", marginBottom: "0.25rem" }}>
-                    Created Date
-                  </label>
-                  <p style={{ color: "hsl(var(--foreground))" }}>
-                    📅 {selectedReport.created_at ? new Date(selectedReport.created_at).toLocaleDateString() : 'Date unknown'}
-                  </p>
-                </div>
-              </div>
-
-              {selectedReport.latitude && selectedReport.longitude && (
-                <div>
-                  <label style={{ fontSize: "0.875rem", fontWeight: "500", color: "hsl(var(--primary))", display: "block", marginBottom: "0.25rem" }}>
-                    Coordinates
-                  </label>
-                  <p style={{ color: "hsl(var(--foreground))", fontFamily: "monospace" }}>
-                    {selectedReport.latitude}, {selectedReport.longitude}
-                  </p>
-                </div>
-              )}
-
-              {selectedReport.images && selectedReport.images.length > 0 && (
-                <div>
-                  <label style={{ fontSize: "0.875rem", fontWeight: "500", color: "hsl(var(--primary))", display: "block", marginBottom: "0.5rem" }}>
-                    Evidence Images
-                  </label>
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(100px, 1fr))", gap: "0.5rem" }}>
-                    {selectedReport.images.map((image: string, index: number) => (
-                      <img
-                        key={index}
-                        src={`${(import.meta.env.VITE_API_URL || "http://localhost:3000").replace('/api', '')}${image}`}
-                        alt={`Evidence ${index + 1}`}
-                        style={{
-                          width: "100%",
-                          height: "80px",
-                          objectFit: "cover",
-                          borderRadius: "0.25rem",
-                          border: "1px solid hsl(var(--border))"
-                        }}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.75rem", marginTop: "2rem" }}>
-              <button
-                onClick={handleCloseReportDetails}
-                style={{
-                  padding: "0.5rem 1rem",
-                  background: "hsl(var(--muted))",
-                  color: "hsl(var(--muted-foreground))",
-                  border: "none",
-                  borderRadius: "0.375rem",
-                  cursor: "pointer",
-                  fontSize: "0.875rem",
-                }}
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
