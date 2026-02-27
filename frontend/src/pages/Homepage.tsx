@@ -198,13 +198,13 @@ const handleSignup = () => {
         className="hero"
         style={{
           backgroundImage:
-            "url(https://stories.freepiklabs.com/api/vectors/people-watching-the-news/amico/render?color=263238FF&background=complete&hide=)",
-          backgroundSize: "contain",
+            "url(https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80)",
+          backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
         }}
       >
-        <div className="hero-overlay" style={{ background: 'linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6))' }} />
+        <div className="hero-overlay" style={{ background: 'linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7))' }} />
         <div className="hero-content">
           <div className="hero-badge">
             <Star size={16} />

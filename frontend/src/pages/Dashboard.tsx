@@ -1,4 +1,4 @@
-import { Flag, LogOut, Grid3x3, Plus, Menu, X, Edit, Home, FilePlus, AlertCircle } from "lucide-react";
+import { Flag, LogOut, Grid3x3, Plus, Menu, X, Edit, Home, FilePlus, AlertCircle, TrendingUp, TrendingDown, Users, CheckCircle, Clock, AlertTriangle, BarChart3, PieChart as PieChartIcon, Calendar, ArrowRight, Eye, ThumbsUp, MessageSquare } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { api } from "@/services/api";
@@ -26,9 +26,7 @@ export default function Dashboard() {
     monthlyData: [] as { month: string; redFlags: number; interventions: number }[],
   });
   
-  // Mobile sidebar state
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [profileData, setProfileData] = useState({
     first_name: "",
@@ -44,47 +42,14 @@ export default function Dashboard() {
   const [typeFilter, setTypeFilter] = useState("all");
   const [showReportDetails, setShowReportDetails] = useState(false);
   const [selectedReport, setSelectedReport] = useState<any>(null);
-  const [userSettings, setUserSettings] = useState({
-    emailNotifications: true,
-    smsNotifications: false,
-    theme: 'light',
-    language: 'en'
-  });
-  const [allUsers, setAllUsers] = useState<any[]>([]);
-  const [showUsersModal, setShowUsersModal] = useState(false);
-  const [loadingUsers, setLoadingUsers] = useState(false);
 
   useEffect(() => {
     if (!currentUser) {
       navigate("/");
       return;
     }
-
     loadStats();
   }, []);
-
-  const loadUsers = async () => {
-    if (!currentUser?.is_admin) {
-      alert("You don't have admin privileges to view users.");
-      return;
-    }
-
-    try {
-      setLoadingUsers(true);
-      const usersRes = await api.getUsers();
-      if (usersRes.status === 200 && usersRes.data) {
-        setAllUsers(usersRes.data);
-        setShowUsersModal(true);
-      } else {
-        alert("Failed to load users. Please try again.");
-      }
-    } catch (error) {
-      console.error("Error loading users:", error);
-      alert("Error loading users. Please check your connection.");
-    } finally {
-      setLoadingUsers(false);
-    }
-  };
 
   const loadStats = async () => {
     try {
@@ -103,7 +68,6 @@ export default function Dashboard() {
       const redFlagsCount = userRedFlags.length;
       const interventionsCount = userInterventions.length;
 
-      // Calculate status distribution
       const allUserReports = [...userRedFlags, ...userInterventions];
       const statusCounts = {
         draft: 0,
@@ -120,10 +84,9 @@ export default function Dashboard() {
         else if (status === 'rejected') statusCounts.rejected++;
       });
 
-      // Prepare chart data
       const typeDistribution = [
         { name: 'Red Flags', value: redFlagsCount, color: 'hsl(var(--destructive))' },
-        { name: 'Interventions', value: interventionsCount, color: 'hsl(var(--chart-2))' },
+        { name: 'Interventions', value: interventionsCount, color: 'hsl(var(--primary))' },
       ];
 
       const statusDistribution = [
@@ -133,10 +96,7 @@ export default function Dashboard() {
         { name: 'Rejected', value: statusCounts.rejected, color: 'hsl(var(--destructive))' },
       ];
 
-      // Process real monthly data from user's reports
       const monthlyStats: { [key: string]: { redFlags: number; interventions: number } } = {};
-
-      // Initialize last 6 months
       const now = new Date();
       for (let i = 5; i >= 0; i--) {
         const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
@@ -144,34 +104,25 @@ export default function Dashboard() {
         monthlyStats[monthKey] = { redFlags: 0, interventions: 0 };
       }
 
-      // Count reports by month
       allUserReports.forEach((report: any) => {
         if (report.created_at || report.createdAt) {
           const createdDate = new Date(report.created_at || report.createdAt);
           const monthKey = createdDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-
-          // Only count if it's within the last 6 months
           const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1);
-          if (createdDate >= sixMonthsAgo) {
-            if (monthlyStats[monthKey]) {
-              // Check if it's a red flag or intervention based on the data structure
-              const isRedFlag = report.type === 'red-flag' || report.type === 'redflag' ||
-                               (report.title && report.title.toLowerCase().includes('red flag')) ||
-                               userRedFlags.some((rf: any) => rf.id === report.id);
-
-              if (isRedFlag) {
-                monthlyStats[monthKey].redFlags++;
-              } else {
-                monthlyStats[monthKey].interventions++;
-              }
+          if (createdDate >= sixMonthsAgo && monthlyStats[monthKey]) {
+            const isRedFlag = report.type === 'red-flag' || report.type === 'redflag' ||
+                             userRedFlags.some((rf: any) => rf.id === report.id);
+            if (isRedFlag) {
+              monthlyStats[monthKey].redFlags++;
+            } else {
+              monthlyStats[monthKey].interventions++;
             }
           }
         }
       });
 
-      // Convert to array format for the chart
       const monthlyData = Object.entries(monthlyStats).map(([month, counts]) => ({
-        month: month.split(' ')[0], // Just the month abbreviation
+        month: month.split(' ')[0],
         redFlags: counts.redFlags,
         interventions: counts.interventions,
       }));
@@ -192,7 +143,6 @@ export default function Dashboard() {
         monthlyData,
       });
 
-      // Set user reports for the history section
       const reportsWithType = [
         ...userRedFlags.map(r => ({ ...r, reportType: 'red-flag' })),
         ...userInterventions.map(r => ({ ...r, reportType: 'intervention' }))
@@ -205,10 +155,8 @@ export default function Dashboard() {
     }
   };
 
-  // Filter reports based on search and filters
   useEffect(() => {
     let filtered = userReports;
-
     if (searchTerm) {
       filtered = filtered.filter(report =>
         report.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -216,17 +164,14 @@ export default function Dashboard() {
         report.location?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-
     if (statusFilter !== "all") {
       filtered = filtered.filter(report =>
         (report.status?.toLowerCase().replace(/\s+/g, '') || 'draft') === statusFilter
       );
     }
-
     if (typeFilter !== "all") {
       filtered = filtered.filter(report => report.reportType === typeFilter);
     }
-
     setFilteredReports(filtered);
   }, [searchTerm, statusFilter, typeFilter, userReports]);
 
@@ -249,21 +194,13 @@ export default function Dashboard() {
   const handleSaveProfile = async () => {
     try {
       setLoading(true);
-
       let updatedUser = { ...currentUser };
-
-      // Upload profile picture if selected
       if (profilePictureFile) {
         const uploadRes = await api.uploadProfilePicture(profilePictureFile);
         if (uploadRes.status === 200 && uploadRes.data && uploadRes.data[0]) {
           updatedUser.profile_picture = uploadRes.data[0].profile_picture;
-        } else {
-          alert("Failed to upload profile picture");
-          return;
         }
       }
-
-      // Update profile data
       const res = await api.updateProfile(profileData);
       if (res.status === 200 && res.data) {
         updatedUser = { ...updatedUser, ...profileData };
@@ -271,353 +208,307 @@ export default function Dashboard() {
         setProfilePictureFile(null);
         setShowProfileModal(false);
         loadStats();
-      } else {
-        alert("Failed to update profile");
       }
     } catch (error) {
       console.error("Error updating profile:", error);
-      alert("Error updating profile");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleCancelEdit = () => {
-    setShowProfileModal(false);
-  };
-
-  const handleViewReportDetails = (report: any) => {
-    setSelectedReport(report);
-    setShowReportDetails(true);
-  };
-
-  const handleCloseReportDetails = () => {
-    setShowReportDetails(false);
-    setSelectedReport(null);
-  };
-
-  const handleSaveSettings = async () => {
-    try {
-      // Here you would typically save settings to backend
-      // For now, we'll just store in localStorage
-      localStorage.setItem('userSettings', JSON.stringify(userSettings));
-      alert('Settings saved successfully!');
-    } catch (error) {
-      console.error('Error saving settings:', error);
-      alert('Error saving settings');
     }
   };
 
   const getStatusColor = (status: string) => {
     const statusLower = status?.toLowerCase().replace(/\s+/g, '') || 'draft';
     switch (statusLower) {
-      case 'draft':
-        return 'hsl(var(--muted-foreground))';
-      case 'underinvestigation':
-        return 'hsl(var(--chart-2))';
-      case 'resolved':
-        return 'hsl(var(--chart-3))';
-      case 'rejected':
-        return 'hsl(var(--destructive))';
-      default:
-        return 'hsl(var(--muted-foreground))';
+      case 'draft': return 'hsl(var(--muted-foreground))';
+      case 'underinvestigation': return 'hsl(var(--chart-2))';
+      case 'resolved': return 'hsl(var(--chart-3))';
+      case 'rejected': return 'hsl(var(--destructive))';
+      default: return 'hsl(var(--muted-foreground))';
     }
   };
 
   const getStatusBadge = (status: string) => {
     const statusLower = status?.toLowerCase().replace(/\s+/g, '') || 'draft';
     switch (statusLower) {
-      case 'draft':
-        return 'Draft';
-      case 'underinvestigation':
-        return 'Under Investigation';
-      case 'resolved':
-        return 'Resolved';
-      case 'rejected':
-        return 'Rejected';
-      default:
-        return 'Draft';
+      case 'draft': return 'Draft';
+      case 'underinvestigation': return 'Under Investigation';
+      case 'resolved': return 'Resolved';
+      case 'rejected': return 'Rejected';
+      default: return 'Draft';
     }
   };
 
   return (
-    <div className="page-dashboard dashboard-layout min-h-screen bg-background">
-      {/* Mobile Hamburger Menu Button - Fixed at top left */}
+    <div className="dashboard-container">
+      {/* Mobile Hamburger */}
       <button
-        className="fixed top-4 left-4 z-50 md:hidden bg-primary text-primary-foreground p-2 rounded-lg shadow-lg hover:bg-primary/90 transition-all duration-300"
+        className="mobile-menu-toggle"
         onClick={() => setSidebarOpen(!sidebarOpen)}
         aria-label="Toggle menu"
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: '44px',
-          height: '44px',
-        }}
       >
         {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
 
-      {/* Dark Overlay for Mobile */}
+      {/* Mobile Overlay */}
       {sidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-40 md:hidden transition-opacity duration-300"
-          onClick={() => setSidebarOpen(false)}
-          style={{ backdropFilter: 'blur(4px)' }}
-        />
+        <div className="mobile-overlay show" onClick={() => setSidebarOpen(false)} />
       )}
 
-      {/* Sidebar - Slide in from left on mobile, fixed on desktop */}
-      <aside 
-        className={`fixed md:static top-0 left-0 h-full w-64 bg-card border-r border-border z-50 transform transition-transform duration-300 ease-in-out md:translate-x-0 ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
-        style={{
-          paddingTop: '60px',
-        }}
-      >
-        <div className="p-4 border-b border-border">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
-              <Flag className="text-primary-foreground" size={20} />
-            </div>
-            <h1 className="text-xl font-bold">iReporter</h1>
+      {/* Sidebar */}
+      <aside className={`page-aside ${sidebarOpen ? 'mobile-open' : ''}`}>
+        <div className="sidebar-brand">
+          <div className="brand-icon-wrapper">
+            <Flag size={24} />
           </div>
+          <span className="sidebar-title">iReporter</span>
         </div>
 
-        <nav className="p-4 space-y-2">
-          <Link 
-            to="/dashboard" 
-            className="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary/10 text-primary font-medium transition-colors"
-            onClick={() => setSidebarOpen(false)}
-          >
+        <nav className="sidebar-nav">
+          <Link to="/dashboard" className="nav-link nav-link-active">
             <Grid3x3 size={20} />
             <span>Dashboard</span>
           </Link>
-
-          <Link 
-            to="/create" 
-            className="flex items-center gap-3 px-4 py-3 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-            onClick={() => setSidebarOpen(false)}
-          >
+          <Link to="/create" className="nav-link">
             <FilePlus size={20} />
-            <span>Create Red Flag</span>
+            <span>Create Report</span>
           </Link>
-
-          <Link 
-            to="/create" 
-            className="flex items-center gap-3 px-4 py-3 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-            onClick={() => setSidebarOpen(false)}
-          >
-            <AlertCircle size={20} />
-            <span>Create Intervention</span>
-          </Link>
-
-          <Link 
-            to="/red-flags" 
-            className="flex items-center gap-3 px-4 py-3 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-            onClick={() => setSidebarOpen(false)}
-          >
+          <Link to="/red-flags" className="nav-link">
             <Flag size={20} />
             <span>My Reports</span>
           </Link>
-
-          <Link 
-            to="/" 
-            className="flex items-center gap-3 px-4 py-3 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-            onClick={() => {
-              setSidebarOpen(false);
-              handleLogout();
-            }}
-          >
+          <button onClick={handleLogout} className="nav-link" style={{ width: '100%', textAlign: 'left' }}>
             <LogOut size={20} />
             <span>Logout</span>
-          </Link>
+          </button>
         </nav>
 
-        {/* User Profile Section */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border bg-card">
+        <div className="sidebar-footer">
           {currentUser && (
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-sm">
+            <div className="user-info-card">
+              <div className="user-avatar-large">
                 {`${currentUser.first_name?.[0] || ""}${currentUser.last_name?.[0] || ""}`}
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-sm truncate">{`${currentUser.first_name} ${currentUser.last_name}`}</p>
-                <p className="text-xs text-muted-foreground">Citizen Reporter</p>
+              <div className="user-info-text">
+                <p className="user-name">{currentUser.first_name} {currentUser.last_name}</p>
+                <p className="user-role">Citizen Reporter</p>
               </div>
             </div>
           )}
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">Theme</span>
-            <ThemeToggle />
-          </div>
         </div>
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 p-4 md:p-8 pt-20 md:pt-8 overflow-x-hidden">
-        {/* Page Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-          <div>
-            <div className="flex items-center gap-2 text-muted-foreground mb-1">
-              <Grid3x3 size={20} />
-              <span>Overview</span>
-            </div>
-            <h2 className="text-2xl font-semibold">My Dashboard</h2>
+      <main className="main-content dashboard-main">
+        {/* Header */}
+        <header className="dashboard-header">
+          <div className="header-welcome">
+            <h1 className="header-title">Welcome back, {currentUser?.first_name}</h1>
+            <p className="header-subtitle">Here's what's happening with your reports</p>
           </div>
-
-          <div className="flex items-center gap-3">
+          <div className="header-actions">
             <NotificationBell />
-            <div className="flex items-center gap-2">
-              <span className="text-sm hidden sm:inline">{currentUser?.first_name} {currentUser?.last_name}</span>
-              <button
-                onClick={handleEditProfile}
-                className="p-1 rounded hover:bg-muted transition-colors"
-                title="Edit Profile"
-              >
-                <Edit size={16} className="text-muted-foreground" />
-              </button>
-              <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-sm">
-                {`${currentUser?.first_name?.[0] || ""}${currentUser?.last_name?.[0] || ""}`}
+            <ThemeToggle />
+            <button onClick={handleEditProfile} className="btn btn-outline btn-sm">
+              <Edit size={16} />
+              Edit Profile
+            </button>
+          </div>
+        </header>
+
+        {/* Stats Cards */}
+        <section className="stats-section">
+          <div className="stats-grid">
+            <div className="stat-card-primary">
+              <div className="stat-icon-wrapper">
+                <FilePlus size={24} />
+              </div>
+              <div className="stat-content">
+                <span className="stat-number">{stats.total}</span>
+                <span className="stat-label">Total Reports</span>
+              </div>
+              <div className="stat-trend positive">
+                <TrendingUp size={16} />
+                <span>All time</span>
+              </div>
+            </div>
+
+            <div className="stat-card-danger">
+              <div className="stat-icon-wrapper">
+                <AlertTriangle size={24} />
+              </div>
+              <div className="stat-content">
+                <span className="stat-number">{stats.redFlags}</span>
+                <span className="stat-label">Red Flags</span>
+              </div>
+              <div className="stat-badge">Corruption Reports</div>
+            </div>
+
+            <div className="stat-card-success">
+              <div className="stat-icon-wrapper">
+                <CheckCircle size={24} />
+              </div>
+              <div className="stat-content">
+                <span className="stat-number">{stats.resolved}</span>
+                <span className="stat-label">Resolved</span>
+              </div>
+              <div className="stat-badge">Issues Fixed</div>
+            </div>
+
+            <div className="stat-card-warning">
+              <div className="stat-icon-wrapper">
+                <Clock size={24} />
+              </div>
+              <div className="stat-content">
+                <span className="stat-number">{stats.underInvestigation}</span>
+                <span className="stat-label">In Progress</span>
+              </div>
+              <div className="stat-badge">Awaiting Action</div>
+            </div>
+          </div>
+        </section>
+
+        {/* Quick Actions */}
+        <section className="quick-actions-section">
+          <h2 className="section-heading">Quick Actions</h2>
+          <div className="quick-actions-grid">
+            <Link to="/create" className="quick-action-card primary">
+              <div className="action-icon">
+                <Flag size={28} />
+              </div>
+              <div className="action-content">
+                <h3>Report Corruption</h3>
+                <p>Submit a red-flag report</p>
+              </div>
+              <ArrowRight size={20} className="action-arrow" />
+            </Link>
+            <Link to="/create" className="quick-action-card secondary">
+              <div className="action-icon">
+                <AlertCircle size={28} />
+              </div>
+              <div className="action-content">
+                <h3>Request Intervention</h3>
+                <p>Report infrastructure issues</p>
+              </div>
+              <ArrowRight size={20} className="action-arrow" />
+            </Link>
+            <Link to="/red-flags" className="quick-action-card tertiary">
+              <div className="action-icon">
+                <Eye size={28} />
+              </div>
+              <div className="action-content">
+                <h3>View All Reports</h3>
+                <p>Track your submissions</p>
+              </div>
+              <ArrowRight size={20} className="action-arrow" />
+            </Link>
+          </div>
+        </section>
+
+        {/* Charts Section */}
+        <section className="charts-section">
+          <div className="charts-grid">
+            <div className="chart-card">
+              <div className="chart-header">
+                <h3><PieChartIcon size={20} /> Report Types</h3>
+              </div>
+              <ResponsiveContainer width="100%" height={250}>
+                <PieChart>
+                  <Pie
+                    data={chartData.typeDistribution}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={50}
+                    outerRadius={80}
+                    paddingAngle={3}
+                    dataKey="value"
+                  >
+                    {chartData.typeDistribution.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="chart-legend">
+                {chartData.typeDistribution.map((item, index) => (
+                  <div key={index} className="legend-item">
+                    <div className="legend-dot" style={{ background: item.color }} />
+                    <span>{item.name}: {item.value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="chart-card">
+              <div className="chart-header">
+                <h3><BarChart3 size={20} /> Status Overview</h3>
+              </div>
+              <ResponsiveContainer width="100%" height={250}>
+                <PieChart>
+                  <Pie
+                    data={chartData.statusDistribution}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={50}
+                    outerRadius={80}
+                    paddingAngle={3}
+                    dataKey="value"
+                  >
+                    {chartData.statusDistribution.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="chart-legend">
+                {chartData.statusDistribution.map((item, index) => (
+                  <div key={index} className="legend-item">
+                    <div className="legend-dot" style={{ background: item.color }} />
+                    <span>{item.name}: {item.value}</span>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-          <div className="bg-card border border-border rounded-xl p-6 text-center">
-            <div className="text-3xl font-bold text-primary mb-2">{stats.total}</div>
-            <div className="text-sm text-muted-foreground">Total Reports</div>
-          </div>
-
-          <div className="bg-card border border-border rounded-xl p-6 text-center">
-            <div className="text-3xl font-bold text-destructive mb-2">{stats.redFlags}</div>
-            <div className="text-sm text-muted-foreground">Red Flags</div>
-          </div>
-
-          <div className="bg-card border border-border rounded-xl p-6 text-center">
-            <div className="text-3xl font-bold text-chart-2 mb-2">{stats.interventions}</div>
-            <div className="text-sm text-muted-foreground">Interventions</div>
-          </div>
-        </div>
-
-        {/* Quick Actions - Mobile Friendly */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-          <Link
-            to="/create"
-            className="flex items-center justify-center gap-2 p-4 bg-primary text-primary-foreground rounded-xl font-medium hover:bg-primary/90 transition-colors"
-          >
-            <Plus size={20} />
-            <span>Create Red Flag</span>
-          </Link>
-          <Link
-            to="/create"
-            className="flex items-center justify-center gap-2 p-4 bg-secondary text-secondary-foreground rounded-xl font-medium hover:bg-secondary/80 transition-colors"
-          >
-            <AlertCircle size={20} />
-            <span>Create Intervention</span>
-          </Link>
-        </div>
-
-        {/* Charts Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* Report Type Distribution */}
-          <div className="bg-card border border-border rounded-xl p-6">
-            <h3 className="text-lg font-semibold mb-4">Report types</h3>
-            <ResponsiveContainer width="100%" height={280}>
-              <PieChart>
-                <Pie
-                  data={chartData.typeDistribution}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={40}
-                  outerRadius={90}
-                  paddingAngle={2}
-                  dataKey="value"
-                >
-                  {chartData.typeDistribution.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="flex justify-center gap-4 mt-4">
-              {chartData.typeDistribution.map((item, index) => (
-                <div key={index} className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ background: item.color }} />
-                  <span className="text-sm text-muted-foreground">{item.name}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Status Distribution */}
-          <div className="bg-card border border-border rounded-xl p-6">
-            <h3 className="text-lg font-semibold mb-4">Report Status</h3>
-            <ResponsiveContainer width="100%" height={280}>
-              <PieChart>
-                <Pie
-                  data={chartData.statusDistribution}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={40}
-                  outerRadius={90}
-                  paddingAngle={2}
-                  dataKey="value"
-                >
-                  {chartData.statusDistribution.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="flex flex-wrap justify-center gap-3 mt-4">
-              {chartData.statusDistribution.map((item, index) => (
-                <div key={index} className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ background: item.color }} />
-                  <span className="text-sm text-muted-foreground">{item.name}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+        </section>
 
         {/* Monthly Trends */}
-        <div className="bg-card border border-border rounded-xl p-6 mb-8">
-          <h3 className="text-lg font-semibold mb-4">Monthly Trends</h3>
-          <ResponsiveContainer width="100%" height={320}>
-            <BarChart data={chartData.monthlyData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="redFlags" fill="hsl(var(--destructive))" name="Red Flags" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="interventions" fill="hsl(var(--chart-2))" name="Interventions" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+        <section className="trends-section">
+          <div className="chart-card full-width">
+            <div className="chart-header">
+              <h3><Calendar size={20} /> Monthly Activity</h3>
+            </div>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={chartData.monthlyData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" />
+                <YAxis stroke="hsl(var(--muted-foreground))" />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="redFlags" fill="hsl(var(--destructive))" name="Red Flags" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="interventions" fill="hsl(var(--primary))" name="Interventions" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </section>
 
         {/* Recent Reports */}
-        <div className="bg-card border border-border rounded-xl p-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-            <h3 className="text-lg font-semibold">Recent Reports</h3>
-            <div className="flex flex-col sm:flex-row gap-2">
+        <section className="reports-section">
+          <div className="section-header">
+            <h2 className="section-heading">Recent Reports</h2>
+            <div className="filter-controls">
               <input
                 type="text"
-                placeholder="Search..."
+                placeholder="Search reports..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="px-4 py-2 rounded-lg border border-input bg-background text-sm"
+                className="search-input"
               />
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="px-4 py-2 rounded-lg border border-input bg-background text-sm"
+                className="filter-select"
               >
                 <option value="all">All Status</option>
                 <option value="draft">Draft</option>
@@ -629,46 +520,58 @@ export default function Dashboard() {
           </div>
 
           {filteredReports.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              {userReports.length === 0 ? "No reports yet. Create your first report!" : "No reports match your filters."}
+            <div className="empty-state">
+              <FilePlus size={48} />
+              <h3>No Reports Yet</h3>
+              <p>Create your first report to start making a difference</p>
+              <Link to="/create" className="btn btn-primary">
+                Create Report
+              </Link>
             </div>
           ) : (
-            <div className="space-y-4">
-              {filteredReports.slice(0, 10).map((report, index) => (
+            <div className="reports-list">
+              {filteredReports.slice(0, 8).map((report, index) => (
                 <div
                   key={report.id || index}
-                  className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors cursor-pointer"
-                  onClick={() => handleViewReportDetails(report)}
+                  className="report-card"
+                  onClick={() => { setSelectedReport(report); setShowReportDetails(true); }}
                 >
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className={`text-xs font-medium px-2 py-0.5 rounded ${
-                        report.reportType === 'red-flag' 
-                          ? 'bg-destructive/10 text-destructive' 
-                          : 'bg-chart-2/10 text-chart-2'
-                      }`}>
+                  <div className="report-type-indicator" 
+                    style={{ background: report.reportType === 'red-flag' ? 'hsl(var(--destructive))' : 'hsl(var(--primary))' }}
+                  />
+                  <div className="report-main">
+                    <div className="report-header">
+                      <span className={`report-type-badge ${report.reportType}`}>
+                        {report.reportType === 'red-flag' ? <Flag size={14} /> : <AlertCircle size={14} />}
                         {report.reportType === 'red-flag' ? 'Red Flag' : 'Intervention'}
                       </span>
-                      <span 
-                        className="text-xs px-2 py-0.5 rounded text-white"
-                        style={{ background: getStatusColor(report.status) }}
-                      >
+                      <span className="report-status" style={{ background: getStatusColor(report.status) }}>
                         {getStatusBadge(report.status)}
                       </span>
                     </div>
-                    <h4 className="font-medium truncate">{report.title || 'Untitled Report'}</h4>
-                    <p className="text-sm text-muted-foreground truncate">{report.description || 'No description'}</p>
+                    <h4 className="report-title">{report.title || 'Untitled Report'}</h4>
+                    <p className="report-description">{report.description || 'No description provided'}</p>
                   </div>
-                  <div className="flex items-center gap-4 mt-2 sm:mt-0 text-sm text-muted-foreground">
-                    <span>📍 {report.location || 'N/A'}</span>
-                    <span>📅 {report.created_at ? new Date(report.created_at).toLocaleDateString() : 'N/A'}</span>
+                  <div className="report-meta">
+                    <span className="meta-item"><MapPin size={14} /> {report.location || 'N/A'}</span>
+                    <span className="meta-item"><Calendar size={14} /> {report.created_at ? new Date(report.created_at).toLocaleDateString() : 'N/A'}</span>
                   </div>
                 </div>
               ))}
             </div>
           )}
-        </div>
+        </section>
       </main>
     </div>
+  );
+}
+
+// Helper component for MapPin icon
+function MapPin({ size }: { size: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+      <circle cx="12" cy="10" r="3"></circle>
+    </svg>
   );
 }
